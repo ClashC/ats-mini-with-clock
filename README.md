@@ -19,3 +19,19 @@ Check out the [Releases](https://github.com/esp32-si4732/ats-mini/releases) page
 ## Documentation
 
 The hardware, software and flashing documentation is available at <https://esp32-si4732.github.io/ats-mini/>
+
+### Firmware mit arduino-cli erstellen
+
+1. Arduino CLI installieren und in das Projektverzeichnis wechseln.
+2. Firmware kompilieren und auf den Empfänger flashen:
+
+```shell
+arduino-cli compile --clean -e -p <PORT> -u ats-mini
+```
+
+`<PORT>` steht für den seriellen Anschluss, z. B. `COM3` oder `/dev/ttyUSB0`.
+Optionale Build-Flags lassen sich mit `--build-property` anhängen, etwa:
+
+```shell
+arduino-cli compile --build-property "compiler.cpp.extra_flags=-DENABLE_HOLDOFF" --clean -e -p <PORT> -u ats-mini
+```
