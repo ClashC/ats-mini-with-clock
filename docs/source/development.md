@@ -47,6 +47,10 @@ You can do all of the above using the `make` command as well:
 ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 ```
 
+## Internal temperature
+
+Use `getInternalTemperature()` from `Utils.h` to read the ESP32 CPU temperature in degrees Celsius. The value is shown on the display when the *Show Temp* option is enabled.
+
 ## Adding a changelog entry
 
 1. Install `uv` <https://docs.astral.sh/uv/getting-started/installation/>

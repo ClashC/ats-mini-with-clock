@@ -22,6 +22,9 @@ bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
 void tempMuteOn(bool x);
 
+// Internal temperature in Celsius
+float getInternalTemperature();
+
 // Wall clock functions
 const char *clockGet();
 bool clockAvailable();

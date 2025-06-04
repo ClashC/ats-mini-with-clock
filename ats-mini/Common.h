@@ -14,7 +14,7 @@
 #define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),"
 #define AUTHORS_LINE4  "Marat Fayzullin"
 #define APP_VERSION    226  // FIRMWARE VERSION
-#define EEPROM_VERSION 71   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 72   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -137,6 +137,7 @@ extern uint16_t currentBrt;
 extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
+extern bool showTemperature;
 extern int8_t scrollDirection;
 extern uint8_t utcOffsetIdx;
 extern uint8_t uiLayoutIdx;
@@ -176,6 +177,9 @@ void drawAboutHelp(uint8_t arrow);
 // Battery.c
 float batteryMonitor();
 bool drawBattery(int x, int y);
+
+// Temperature sensor
+float getInternalTemperature();
 
 // Station.c
 const char *getStationName();
