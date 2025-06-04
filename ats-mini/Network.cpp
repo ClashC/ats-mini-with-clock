@@ -427,8 +427,9 @@ void webSetConfig(AsyncWebServerRequest *request)
   }
 
   // Save scroll direction and menu zoom
-  scrollDirection = request->hasParam("scroll", true)? -1 : 1;
-  zoomMenu        = request->hasParam("zoom", true);
+  scrollDirection  = request->hasParam("scroll", true)? -1 : 1;
+  zoomMenu         = request->hasParam("zoom", true);
+  showTemperature  = request->hasParam("temp", true);
   eepromSave = true;
 
   // Done with the preferences
@@ -768,6 +769,11 @@ const String webConfigPage()
     "<TD CLASS='LABEL'>Zoomed Menu</TD>"
     "<TD><INPUT TYPE='CHECKBOX' NAME='zoom' VALUE='on'" +
     (zoomMenu? " CHECKED ":"") + "></TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Show Temp</TD>"
+    "<TD><INPUT TYPE='CHECKBOX' NAME='temp' VALUE='on'" +
+    (showTemperature? " CHECKED ":"") + "></TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>"
     "<INPUT TYPE='SUBMIT' VALUE='Save'>"

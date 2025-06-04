@@ -1,4 +1,5 @@
 #include "driver/rtc_io.h"
+#include "esp_system.h"
 #include "Common.h"
 #include "Themes.h"
 #include "Button.h"
@@ -17,6 +18,13 @@ static bool sleep_on = false;
 
 // Current SSB patch status
 static bool ssbLoaded = false;
+
+extern "C" uint8_t temprature_sens_read();
+
+float getInternalTemperature()
+{
+  return (temprature_sens_read() - 32) / 1.8;
+}
 
 // Time
 static bool clockHasBeenSet = false;

@@ -113,11 +113,12 @@ static const char *menu[] =
 #define MENU_UI           6
 #define MENU_ZOOM         7
 #define MENU_SCROLL       8
-#define MENU_SLEEP        9
-#define MENU_SLEEPMODE    10
-#define MENU_LOADEIBI     11
-#define MENU_WIFIMODE     12
-#define MENU_ABOUT        13
+#define MENU_SHOWTEMP     9
+#define MENU_SLEEP        10
+#define MENU_SLEEPMODE    11
+#define MENU_LOADEIBI     12
+#define MENU_WIFIMODE     13
+#define MENU_ABOUT        14
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -132,6 +133,7 @@ static const char *settings[] =
   "UI Layout",
   "Zoom Menu",
   "Scroll Dir.",
+  "Show Temp",
   "Sleep",
   "Sleep Mode",
   "Load EiBi",
@@ -590,6 +592,11 @@ static void doScrollDir(int dir)
   scrollDirection = (scrollDirection == 1) ? -1 : 1;
 }
 
+static void doShowTemp(int dir)
+{
+  showTemperature = !showTemperature;
+}
+
 uint8_t doAbout(int dir)
 {
   static uint8_t aboutScreen = 0;
@@ -815,6 +822,7 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
     case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
     case MENU_SCROLL:     currentCmd = CMD_SCROLL;    break;
+    case MENU_SHOWTEMP:   currentCmd = CMD_TEMPERATURE;break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
@@ -861,6 +869,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_WIFIMODE:  doWiFiMode(scrollDirection * dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_SCROLL:    doScrollDir(dir);break;
+    case CMD_TEMPERATURE: doShowTemp(dir);break;
     case CMD_UTCOFFSET: doUTCOffset(scrollDirection * dir);break;
     case CMD_SQUELCH:   doSquelch(dir);break;
     case CMD_ABOUT:     doAbout(dir);break;
@@ -1426,6 +1435,16 @@ static void drawScrollDir(int x, int y, int sx)
     spr.fillTriangle(39+x+(sx/2)-5, 85+y, 39+x+(sx/2)+5, 85+y, 39+x+(sx/2), 85+y+5, TH.menu_param);
 }
 
+static void drawShowTemp(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_SHOWTEMP], x, y, sx);
+  drawZoomedMenu(settings[MENU_SHOWTEMP]);
+  spr.setTextDatum(MC_DATUM);
+
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawString(showTemperature ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
+}
+
 static void drawInfo(int x, int y, int sx)
 {
   char text[16];
@@ -1433,52 +1452,59 @@ static void drawInfo(int x, int y, int sx)
   // Info box
   spr.setTextDatum(ML_DATUM);
   spr.setTextColor(TH.box_text, TH.box_bg);
-  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_border);
-  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.box_bg);
+  int boxHeight = 110 + (showTemperature ? 16 : 0);
+  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, boxHeight, 4, TH.box_border);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, boxHeight-2, 4, TH.box_bg);
 
-  spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
-  spr.drawString(getCurrentStep()->desc, 48+x, 64+y+(-3*16), 2);
+  int line = -3;
+  spr.drawString("Step:", 6+x, 64+y+(line*16), 2);
+  spr.drawString(getCurrentStep()->desc, 48+x, 64+y+(line*16), 2);
+  line++;
 
-  spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
-  spr.drawString(getCurrentBandwidth()->desc, 48+x, 64+y+(-2*16), 2);
+  spr.drawString("BW:", 6+x, 64+y+(line*16), 2);
+  spr.drawString(getCurrentBandwidth()->desc, 48+x, 64+y+(line*16), 2);
+  line++;
 
   if(!agcNdx && !agcIdx)
   {
-    spr.drawString("AGC:", 6+x, 64+y+(-1*16), 2);
-    spr.drawString("On", 48+x, 64+y+(-1*16), 2);
+    spr.drawString("AGC:", 6+x, 64+y+(line*16), 2);
+    spr.drawString("On", 48+x, 64+y+(line*16), 2);
   }
   else
   {
     sprintf(text, "%2.2d", agcNdx);
-    spr.drawString("Att:", 6+x, 64+y+(-1*16), 2);
-    spr.drawString(text, 48+x, 64+y+(-1*16), 2);
+    spr.drawString("Att:", 6+x, 64+y+(line*16), 2);
+    spr.drawString(text, 48+x, 64+y+(line*16), 2);
   }
+  line++;
 
-  spr.drawString("Vol:", 6+x, 64+y+(0*16), 2);
+  spr.drawString("Vol:", 6+x, 64+y+(line*16), 2);
   if(muteOn() || squelchCutoff)
   {
     spr.setTextColor(TH.box_off_text, TH.box_off_bg);
     sprintf(text, muteOn() ? "Muted" : "%d/sq", volume);
-    spr.drawString(text, 48+x, 64+y+(0*16), 2);
+    spr.drawString(text, 48+x, 64+y+(line*16), 2);
     spr.setTextColor(TH.box_text, TH.box_bg);
   }
   else
   {
     spr.setTextColor(TH.box_text, TH.box_bg);
-    spr.drawNumber(volume, 48+x, 64+y+(0*16), 2);
+    spr.drawNumber(volume, 48+x, 64+y+(line*16), 2);
   }
 
   // Draw RDS PI code, if present
   uint16_t piCode = getRdsPiCode();
   if(piCode && currentMode == FM)
   {
+    line++;
     sprintf(text, "%04X", piCode);
-    spr.drawString("PI:", 6+x, 64+y + (1*16), 2);
-    spr.drawString(text, 48+x, 64+y + (1*16), 2);
+    spr.drawString("PI:", 6+x, 64+y + (line*16), 2);
+    spr.drawString(text, 48+x, 64+y + (line*16), 2);
   }
   else
   {
-    spr.drawString("AVC:", 6+x, 64+y + (1*16), 2);
+    line++;
+    spr.drawString("AVC:", 6+x, 64+y + (line*16), 2);
 
     if(currentMode==FM)
       sprintf(text, "n/a");
@@ -1487,14 +1513,22 @@ static void drawInfo(int x, int y, int sx)
     else
       sprintf(text, "%2.2ddB", AmAvcIdx);
 
-    spr.drawString(text, 48+x, 64+y + (1*16), 2);
+    spr.drawString(text, 48+x, 64+y + (line*16), 2);
   }
 
-  // Draw current time
   if(clockGet())
   {
-    spr.drawString("Time:", 6+x, 64+y+(2*16), 2);
-    spr.drawString(clockGet(), 48+x, 64+y+(2*16), 2);
+    line++;
+    spr.drawString("Time:", 6+x, 64+y+(line*16), 2);
+    spr.drawString(clockGet(), 48+x, 64+y+(line*16), 2);
+  }
+
+  if(showTemperature)
+  {
+    line++;
+    sprintf(text, "%.1fC", getInternalTemperature());
+    spr.drawString("Temp:", 6+x, 64+y+(line*16), 2);
+    spr.drawString(text, 48+x, 64+y+(line*16), 2);
   }
 }
 
@@ -1530,6 +1564,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
+    case CMD_TEMPERATURE:drawShowTemp(x, y, sx); break;
     case CMD_UTCOFFSET: drawUTCOffset(x, y, sx); break;
     case CMD_SQUELCH:   drawSquelch(x, y, sx);   break;
     default:            drawInfo(x, y, sx);      break;
