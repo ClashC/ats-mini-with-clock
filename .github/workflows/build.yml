@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'ats-mini-with-clock/**'
+      - 'ats-mini/**'
       - '.github/workflows/build.yml'
       - '.pre-commit-config.yaml'
   push:
@@ -14,7 +14,7 @@ on:
     # branches:
     #   - main
     paths:
-      - 'ats-mini-with-clock/**'
+      - 'ats-mini/**'
       - '.github/workflows/build.yml'
       - '.pre-commit-config.yaml'
   workflow_dispatch:
@@ -71,9 +71,9 @@ jobs:
 
       - name: Prepare compiled artifact
         run: |
-          mkdir -p artifact/ats-mini-with-clock
-          mv ats-mini-with-clock/build/esp32.esp32.esp32s3/*.ino.bin ats-mini-with-clock/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini-with-clock/
-          cp CHANGELOG.md artifact/ats-mini-with-clock/
+          mkdir -p artifact/ats-mini
+          mv ats-mini-with-clock/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini/
+          cp CHANGELOG.md artifact/ats-mini/
 
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v4
@@ -105,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ needs.build.outputs.slug }}
         run: >-
-          python -c 'import os,re; t=open("artifact/ats-mini-with-clock/CHANGELOG.md").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
+          python -c 'import os,re; t=open("artifact/ats-mini/CHANGELOG.md").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
           gh release create "$SLUG" --repo '${{ github.repository }}' --notes-file -
       - name: Upload release artifact
         env:
