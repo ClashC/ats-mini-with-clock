@@ -1,0 +1,22 @@
+name: Build Firmware
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  metadata: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4  # Neuere Version verwenden
+      with:
+        fetch-depth: 0  # Vollständige Git-Historie
