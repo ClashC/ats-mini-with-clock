@@ -4,9 +4,12 @@
 #include "Storage.h"
 #include "Utils.h"
 #include "Menu.h"
+#include "Button.h"
 #include <LittleFS.h>
 #include <nvs.h>
 #include <nvs_flash.h>
+
+extern ButtonTracker pb1;
 
 // Display position control
 #define MENU_OFFSET_X    0    // Menu horizontal offset
@@ -207,6 +210,40 @@ void drawLoadingSSB()
   spr.setTextColor(TH.text, TH.menu_bg);
   spr.drawString("Loading SSB", 160, 62, 4);
   spr.pushSprite(0, 0);
+}
+
+//
+// Display clock while in standby mode
+//
+void drawClockStandby()
+{
+  while(true)
+  {
+    spr.fillSprite(TH.bg);
+    spr.setTextDatum(MC_DATUM);
+    spr.setTextColor(TH.freq_text, TH.bg);
+    spr.setFreeFont(&Orbitron_Light_24);
+    const char *t = clockGet();
+    if(!t) t = "--:--";
+    spr.drawString(t, 160, 85, 4);
+    spr.pushSprite(0, 0);
+
+    uint32_t tm = millis();
+    bool exit = false;
+    while(millis() - tm < 1000)
+    {
+      ButtonTracker::State st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
+      if(st.isLongPressed || st.wasShortPressed || st.wasClicked)
+      {
+        exit = true;
+        break;
+      }
+      delay(50);
+    }
+
+    if(exit) break;
+    clockTickTime();
+  }
 }
 
 //
