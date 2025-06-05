@@ -222,10 +222,10 @@ void drawClockStandby()
     spr.fillSprite(TH.bg);
     spr.setTextDatum(MC_DATUM);
     spr.setTextColor(TH.freq_text, TH.bg);
-    spr.setFreeFont(&Orbitron_Light_24);
+    spr.setTextFont(8);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    spr.drawString(t, 160, 85, 4);
+    spr.drawString(t, 160, 85, 8);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
