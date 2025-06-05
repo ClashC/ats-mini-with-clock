@@ -19,11 +19,9 @@ static bool sleep_on = false;
 // Current SSB patch status
 static bool ssbLoaded = false;
 
-extern "C" uint8_t temprature_sens_read();
-
 float getInternalTemperature()
 {
-  return (temprature_sens_read() - 32) / 1.8;
+  return temperatureRead();
 }
 
 // Time
