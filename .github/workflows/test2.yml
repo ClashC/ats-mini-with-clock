@@ -1,4 +1,4 @@
-name: Build Firmware
+name: Build Firmware test2
 
 on:
   pull_request:
