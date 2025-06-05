@@ -51,7 +51,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sketch-paths: |
-            - ats-mini-with-clock
+            - ats-mini
           # If you change this line, change it in sketch.yaml as well
           fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=custom,DebugLevel=none
           cli-compile-flags: |
@@ -72,7 +72,7 @@ jobs:
       - name: Prepare compiled artifact
         run: |
           mkdir -p artifact/ats-mini
-          mv ats-mini-with-clock/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini/
+          mv ats-mini/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini/
           cp CHANGELOG.md artifact/ats-mini/
 
       - name: Upload compiled artifact
