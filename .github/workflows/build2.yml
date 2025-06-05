@@ -20,4 +20,3 @@ jobs:
       uses: actions/checkout@v4  # Neuere Version verwenden
       with:
         fetch-depth: 0  # Vollständige Git-Historie
-        token: ${{ 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 }}
