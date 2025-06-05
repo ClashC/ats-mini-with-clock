@@ -155,58 +155,68 @@ bool sleepOn(int x)
   if((x==1) && !sleep_on)
   {
     sleep_on = true;
-    ledcWrite(PIN_LCD_BL, 0);
-    spr.fillSprite(TFT_BLACK);
-    spr.pushSprite(0, 0);
-    tft.writecommand(ST7789_DISPOFF);
-    tft.writecommand(ST7789_SLPIN);
-
-    // Wait till the button is released to prevent immediate wakeup
-    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
-      delay(100);
-
-    if(sleepModeIdx == SLEEP_LIGHT)
+    if(sleepModeIdx == SLEEP_CLOCK)
     {
-      // Disable WiFi
-      netStop();
+      while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
+        delay(100);
+      drawClockStandby();
+      sleepOn(false);
+    }
+    else
+    {
+      ledcWrite(PIN_LCD_BL, 0);
+      spr.fillSprite(TFT_BLACK);
+      spr.pushSprite(0, 0);
+      tft.writecommand(ST7789_DISPOFF);
+      tft.writecommand(ST7789_SLPIN);
 
-      // Unmute squelch
-      if(squelchCutoff) tempMuteOn(false);
+      // Wait till the button is released to prevent immediate wakeup
+      while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
+        delay(100);
 
-      while(true)
+      if(sleepModeIdx == SLEEP_LIGHT)
       {
-        esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
-        rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
-        rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-        esp_light_sleep_start();
+        // Disable WiFi
+        netStop();
 
-        // Waking up here
-        if(currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+        // Unmute squelch
+        if(squelchCutoff) tempMuteOn(false);
 
-        // Wait for a long press, otherwise enter the sleep again
-        pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
-
-        bool wasLongPressed = false;
         while(true)
         {
-          ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
-          wasLongPressed |= pb1st.isLongPressed;
-          if(wasLongPressed || !pb1st.isPressed) break;
-          delay(100);
-        }
+          esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
+          rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
+          rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+          esp_light_sleep_start();
 
-        if(wasLongPressed) break;
-      }
-      // Reenable the pin as well as the display
-      rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-      rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
-      pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
-      if(squelchCutoff) tempMuteOn(true);
-      sleepOn(false);
-      // Enable WiFi
+          // Waking up here
+          if(currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+
+          // Wait for a long press, otherwise enter the sleep again
+          pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
+
+          bool wasLongPressed = false;
+          while(true)
+          {
+            ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
+            wasLongPressed |= pb1st.isLongPressed;
+            if(wasLongPressed || !pb1st.isPressed) break;
+            delay(100);
+          }
+
+          if(wasLongPressed) break;
+        }
+        // Reenable the pin as well as the display
+        rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+        rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+        rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
+        pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
+        if(squelchCutoff) tempMuteOn(true);
+        sleepOn(false);
+        // Enable WiFi
       netInit(wifiModeIdx, false);
     }
+  }
   }
   else if((x==0) && sleep_on)
   {
