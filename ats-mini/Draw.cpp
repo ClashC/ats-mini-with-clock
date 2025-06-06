@@ -219,9 +219,11 @@ void drawClockStandby()
 {
   while(true)
   {
-    spr.fillSprite(TH.bg);
+    // Draw clock with a fixed black background so it does not depend on theme
+    // colors. Use light grey digits on black to mimic a seven segment display.
+    spr.fillSprite(TFT_BLACK);
     spr.setTextDatum(MC_DATUM);
-    spr.setTextColor(TH.freq_text, TH.bg);
+    spr.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
     spr.setTextFont(8);
     const char *t = clockGet();
     if(!t) t = "--:--";
