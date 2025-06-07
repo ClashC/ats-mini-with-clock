@@ -227,7 +227,27 @@ void drawClockStandby()
     spr.setTextFont(8);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    spr.drawString(t, 160, 85, 8);
+
+    // Some 7-segment fonts do not include a ':' glyph.  If the time string
+    // contains a colon we draw the digits and colon separately so that the
+    // clock renders correctly with font 8.
+    if(strlen(t) >= 5 && t[2] == ':')
+    {
+      char buf[3] = {0};
+      buf[0] = t[0];
+      buf[1] = t[1];
+      spr.drawString(buf, 130, 85, 8);
+
+      // Draw colon manually
+      spr.fillRect(158, 78, 4, 4, TFT_LIGHTGREY);
+      spr.fillRect(158, 94, 4, 4, TFT_LIGHTGREY);
+
+      buf[0] = t[3];
+      buf[1] = t[4];
+      spr.drawString(buf, 190, 85, 8);
+    }
+    else
+      spr.drawString(t, 160, 85, 8);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
