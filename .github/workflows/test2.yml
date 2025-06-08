@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           ref: "${{ github.event.inputs.revision || github.ref }}"
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get version slug
         id: slug
         run: |
