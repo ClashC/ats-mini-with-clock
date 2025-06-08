@@ -213,6 +213,87 @@ void drawLoadingSSB()
 }
 
 //
+// Seven segment clock rendering helpers
+//
+static const uint8_t segDigits[10] =
+{
+  0x3F, // 0
+  0x06, // 1
+  0x5B, // 2
+  0x4F, // 3
+  0x66, // 4
+  0x6D, // 5
+  0x7D, // 6
+  0x07, // 7
+  0x7F, // 8
+  0x6F  // 9
+};
+
+static const int SEG_LEN  = 20;
+static const int SEG_W    = 4;
+static const int DIGIT_W  = SEG_LEN + SEG_W * 2;
+static const int DIGIT_H  = SEG_LEN * 2 + SEG_W * 3;
+static const int DIGIT_GAP = SEG_W;
+
+static void drawSeg(int x, int y, int w, int h, uint16_t c)
+{
+  spr.fillRect(x, y, w, h, c);
+}
+
+static void draw7SegChar(char ch, int x, int y, uint16_t col)
+{
+  if(ch == ' ')
+    return;
+
+  if(ch == '-')
+  {
+    drawSeg(x + SEG_W, y + SEG_LEN + SEG_W, SEG_LEN, SEG_W, col); // G
+    return;
+  }
+
+  if(ch == ':')
+  {
+    int cx = x + DIGIT_W / 2 - SEG_W / 2;
+    drawSeg(cx, y + SEG_W + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
+    drawSeg(cx, y + SEG_W * 2 + SEG_LEN + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
+    return;
+  }
+
+  if(ch < '0' || ch > '9')
+    return;
+
+  uint8_t mask = segDigits[ch - '0'];
+
+  if(mask & 0x01) drawSeg(x + SEG_W,             y,                        SEG_LEN, SEG_W, col);               // A
+  if(mask & 0x02) drawSeg(x + SEG_W + SEG_LEN,   y + SEG_W,                SEG_W,   SEG_LEN, col);             // B
+  if(mask & 0x04) drawSeg(x + SEG_W + SEG_LEN,   y + SEG_W * 2 + SEG_LEN,  SEG_W,   SEG_LEN, col);             // C
+  if(mask & 0x08) drawSeg(x + SEG_W,             y + SEG_W * 2 + SEG_LEN * 2, SEG_LEN, SEG_W, col);            // D
+  if(mask & 0x10) drawSeg(x,                     y + SEG_W * 2 + SEG_LEN,  SEG_W,   SEG_LEN, col);             // E
+  if(mask & 0x20) drawSeg(x,                     y + SEG_W,                SEG_W,   SEG_LEN, col);             // F
+  if(mask & 0x40) drawSeg(x + SEG_W,             y + SEG_W + SEG_LEN,      SEG_LEN, SEG_W, col);               // G
+}
+
+static int sevenSegWidth(const char *s)
+{
+  int w = 0;
+  for(const char *p = s; *p; ++p)
+  {
+    w += (*p == ':' ? SEG_W * 2 : DIGIT_W);
+    if(p[1]) w += DIGIT_GAP;
+  }
+  return w;
+}
+
+static void drawSevenSegString(const char *s, int x, int y, uint16_t col)
+{
+  for(const char *p = s; *p; ++p)
+  {
+    draw7SegChar(*p, x, y, col);
+    x += (*p == ':' ? SEG_W * 2 : DIGIT_W) + DIGIT_GAP;
+  }
+}
+
+//
 // Display clock while in standby mode
 //
 void drawClockStandby()
@@ -222,12 +303,10 @@ void drawClockStandby()
     // Draw clock with a fixed black background so it does not depend on theme
     // colors. Use light grey digits on black to mimic a seven segment display.
     spr.fillSprite(TFT_BLACK);
-    spr.setTextDatum(MC_DATUM);
-    spr.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-    spr.setTextFont(8);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    spr.drawString(t, 160, 85, 8);
+    int w = sevenSegWidth(t);
+    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, TFT_LIGHTGREY);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
