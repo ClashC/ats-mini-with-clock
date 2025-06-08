@@ -23,7 +23,10 @@ on:
         description: "A tag to release, e.g. v1.00"
         type: string
         required: false
-
+  permissions:
+    contents: read
+    actions: read
+  
 jobs:
   build:
     runs-on: ubuntu-latest
