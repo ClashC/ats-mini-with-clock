@@ -1,5 +1,4 @@
 name: Build Firmware test2
-
 on:
   pull_request:
     branches:
@@ -23,6 +22,8 @@ on:
         description: "A tag to release, e.g. v1.00"
         type: string
         required: false
+
+# Global permissions für den gesamten Workflow
 permissions:
   contents: read
   actions: read
@@ -30,7 +31,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: {}
+    # Entferne die leeren permissions hier - erbt von global
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: true
     outputs:
@@ -42,16 +46,19 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           ref: "${{ github.event.inputs.revision || github.ref }}"
-          token: ${{ secrets.PAT_TOKEN }}
+          # Verwende GITHUB_TOKEN statt PAT_TOKEN für checkout
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Get version slug
         id: slug
         run: |
           echo "slug=$(git describe --tags --match 'v?.??' --always --dirty || echo v0.00)" >> "$GITHUB_OUTPUT"
-
+          
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}
+          # Für arduino/compile-sketches kann GITHUB_TOKEN verwendet werden
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           sketch-paths: |
             - ats-mini
           # If you change this line, change it in sketch.yaml as well
@@ -63,33 +70,33 @@ jobs:
           # Disabled to prevent building artifact for a previous commit
           enable-deltas-report: false
           enable-warnings-report: true
-
+          
       - name: Save sketches report artifact
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           path: sketches-reports
           name: sketches-report
-
+          
       - name: Prepare compiled artifact
         run: |
           mkdir -p artifact/ats-mini
           mv ats-mini/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini/
           cp CHANGELOG.md artifact/ats-mini/
-
+          
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.slug }}
           path: artifact
-
+          
   release:
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Wichtig für Release-Erstellung
     strategy:
       fail-fast: true
     steps:
@@ -98,20 +105,24 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}
           path: artifact
+          
       - name: Archive the build artifact
         run: cd "artifact" && zip -9 -r "../${FILENAME}" ./*
         env:
           FILENAME: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}.zip
+          
       - name: Create release
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          # Verwende secrets.GITHUB_TOKEN für bessere Kompatibilität
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLUG: ${{ needs.build.outputs.slug }}
         run: >-
           python -c 'import os,re; t=open("artifact/ats-mini/CHANGELOG.md").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
           gh release create "$SLUG" --repo '${{ github.repository }}' --notes-file -
+          
       - name: Upload release artifact
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FILENAME: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}.zip
           SLUG: ${{ needs.build.outputs.slug }}
         run: |
