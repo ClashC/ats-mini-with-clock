@@ -105,26 +105,28 @@ static const char *menu[] =
 //
 
 #define MENU_BRIGHTNESS   0
-#define MENU_CALIBRATION  1
-#define MENU_RDS          2
-#define MENU_UTCOFFSET    3
-#define MENU_FM_REGION    4
-#define MENU_THEME        5
-#define MENU_UI           6
-#define MENU_ZOOM         7
-#define MENU_SCROLL       8
-#define MENU_SHOWTEMP     9
-#define MENU_SLEEP        10
-#define MENU_SLEEPMODE    11
-#define MENU_LOADEIBI     12
-#define MENU_WIFIMODE     13
-#define MENU_ABOUT        14
+#define MENU_CLOCKBRT     1
+#define MENU_CALIBRATION  2
+#define MENU_RDS          3
+#define MENU_UTCOFFSET    4
+#define MENU_FM_REGION    5
+#define MENU_THEME        6
+#define MENU_UI           7
+#define MENU_ZOOM         8
+#define MENU_SCROLL       9
+#define MENU_SHOWTEMP     10
+#define MENU_SLEEP        11
+#define MENU_SLEEPMODE    12
+#define MENU_LOADEIBI     13
+#define MENU_WIFIMODE     14
+#define MENU_ABOUT        15
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
 static const char *settings[] =
 {
   "Brightness",
+  "Clock Brt",
   "Calibration",
   "RDS",
   "UTC Offset",
@@ -549,6 +551,11 @@ void doBrt(int dir)
   if(!sleepOn()) ledcWrite(PIN_LCD_BL, currentBrt);
 }
 
+static void doClockBrt(int dir)
+{
+  clockBrt = clamp_range(clockBrt, dir, 1, 50);
+}
+
 static void doSleep(int dir)
 {
   currentSleep = clamp_range(currentSleep, 5*dir, 0, 255);
@@ -814,6 +821,7 @@ static void clickSettings(int cmd, bool shortPress)
   switch(cmd)
   {
     case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
+    case MENU_CLOCKBRT:   currentCmd = CMD_CLOCKBRT; break;
     case MENU_CALIBRATION:
       if(isSSB()) currentCmd = CMD_CAL;
       break;
@@ -859,6 +867,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_FM_REGION: doFmRegion(scrollDirection * dir);break;
     case CMD_SETTINGS:  doSettings(scrollDirection * dir);break;
     case CMD_BRT:       doBrt(dir);break;
+    case CMD_CLOCKBRT:  doClockBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
     case CMD_THEME:     doTheme(scrollDirection * dir);break;
     case CMD_UI:        doUILayout(scrollDirection * dir);break;
@@ -1403,6 +1412,16 @@ static void drawBrt(int x, int y, int sx)
   spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawClockBrt(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_CLOCKBRT], x, y, sx);
+  drawZoomedMenu(settings[MENU_CLOCKBRT]);
+  spr.setTextDatum(MC_DATUM);
+
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawNumber(clockBrt, 40+x+(sx/2), 60+y, 4);
+}
+
 static void drawSleep(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SLEEP], x, y, sx);
@@ -1557,6 +1576,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_AVC:       drawAvc(x, y, sx);       break;
     case CMD_FM_REGION: drawFmRegion(x, y, sx);  break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
+    case CMD_CLOCKBRT:  drawClockBrt(x, y, sx);  break;
     case CMD_RDS:       drawRDSMode(x, y, sx);   break;
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;

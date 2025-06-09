@@ -14,7 +14,7 @@
 #define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),"
 #define AUTHORS_LINE4  "Marat Fayzullin"
 #define APP_VERSION    226  // FIRMWARE VERSION
-#define EEPROM_VERSION 72   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 73   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -135,6 +135,7 @@ extern int16_t currentBFO;
 extern uint8_t currentMode;
 extern uint16_t currentCmd;
 extern uint16_t currentBrt;
+extern uint8_t  clockBrt;
 extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
