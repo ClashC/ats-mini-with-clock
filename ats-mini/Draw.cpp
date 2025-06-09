@@ -234,6 +234,7 @@ static const int SEG_W    = 10;
 static const int DIGIT_W  = SEG_LEN + SEG_W * 2;
 static const int DIGIT_H  = SEG_LEN * 2 + SEG_W * 3;
 static const int DIGIT_GAP = SEG_W;
+static const int COLON_W  = SEG_W * 2;
 
 static void drawSeg(int x, int y, int w, int h, uint16_t c)
 {
@@ -253,7 +254,9 @@ static void draw7SegChar(char ch, int x, int y, uint16_t col)
 
   if(ch == ':')
   {
-    int cx = x + DIGIT_W / 2 - SEG_W / 2;
+    // Center the colon within its narrow width so it sits neatly between
+    // adjacent digits.
+    int cx = x + (COLON_W - SEG_W) / 2;
     drawSeg(cx, y + SEG_W + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
     drawSeg(cx, y + SEG_W * 2 + SEG_LEN + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
     return;
@@ -278,7 +281,7 @@ static int sevenSegWidth(const char *s)
   int w = 0;
   for(const char *p = s; *p; ++p)
   {
-    w += (*p == ':' ? SEG_W * 2 : DIGIT_W);
+    w += (*p == ':' ? COLON_W : DIGIT_W);
     if(p[1]) w += DIGIT_GAP;
   }
   return w;
@@ -289,7 +292,7 @@ static void drawSevenSegString(const char *s, int x, int y, uint16_t col)
   for(const char *p = s; *p; ++p)
   {
     draw7SegChar(*p, x, y, col);
-    x += (*p == ':' ? SEG_W * 2 : DIGIT_W) + DIGIT_GAP;
+    x += (*p == ':' ? COLON_W : DIGIT_W) + DIGIT_GAP;
   }
 }
 
