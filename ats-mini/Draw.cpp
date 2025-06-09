@@ -278,7 +278,9 @@ static int sevenSegWidth(const char *s)
   int w = 0;
   for(const char *p = s; *p; ++p)
   {
-    w += (*p == ':' ? SEG_W * 2 : DIGIT_W);
+    // All characters occupy a full digit width for consistent centering
+    // even though ':' is visually narrower.
+    w += DIGIT_W;
     if(p[1]) w += DIGIT_GAP;
   }
   return w;
@@ -289,7 +291,8 @@ static void drawSevenSegString(const char *s, int x, int y, uint16_t col)
   for(const char *p = s; *p; ++p)
   {
     draw7SegChar(*p, x, y, col);
-    x += (*p == ':' ? SEG_W * 2 : DIGIT_W) + DIGIT_GAP;
+    // Advance by a full digit width to keep the colon centred between digits
+    x += DIGIT_W + DIGIT_GAP;
   }
 }
 
