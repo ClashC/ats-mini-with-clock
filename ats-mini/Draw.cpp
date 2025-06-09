@@ -309,7 +309,7 @@ void drawClockStandby()
     const char *t = clockGet();
     if(!t) t = "--:--";
     int w = sevenSegWidth(t);
-    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, 0xC618);
+    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, clockColors[clockColorIdx].color);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();

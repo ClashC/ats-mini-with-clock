@@ -30,6 +30,7 @@
 #define CMD_SETTINGS  0x2000 //-SETTINGS MODE starts here
 #define CMD_BRT       0x2100 // |
 #define CMD_CLOCKBRT  0x2101 // |
+#define CMD_CLOCKCOLOR 0x2102 // |
 #define CMD_CAL       0x2200 // |
 #define CMD_RDS       0x2300 // |
 #define CMD_UTCOFFSET 0x2400 // |

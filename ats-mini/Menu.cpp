@@ -106,20 +106,21 @@ static const char *menu[] =
 
 #define MENU_BRIGHTNESS   0
 #define MENU_CLOCKBRT     1
-#define MENU_CALIBRATION  2
-#define MENU_RDS          3
-#define MENU_UTCOFFSET    4
-#define MENU_FM_REGION    5
-#define MENU_THEME        6
-#define MENU_UI           7
-#define MENU_ZOOM         8
-#define MENU_SCROLL       9
-#define MENU_SHOWTEMP     10
-#define MENU_SLEEP        11
-#define MENU_SLEEPMODE    12
-#define MENU_LOADEIBI     13
-#define MENU_WIFIMODE     14
-#define MENU_ABOUT        15
+#define MENU_CLOCKCOLOR   2
+#define MENU_CALIBRATION  3
+#define MENU_RDS          4
+#define MENU_UTCOFFSET    5
+#define MENU_FM_REGION    6
+#define MENU_THEME        7
+#define MENU_UI           8
+#define MENU_ZOOM         9
+#define MENU_SCROLL       10
+#define MENU_SHOWTEMP     11
+#define MENU_SLEEP        12
+#define MENU_SLEEPMODE    13
+#define MENU_LOADEIBI     14
+#define MENU_WIFIMODE     15
+#define MENU_ABOUT        16
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -127,6 +128,7 @@ static const char *settings[] =
 {
   "Brightness",
   "Clock Brt",
+  "Clock Color",
   "Calibration",
   "RDS",
   "UTC Offset",
@@ -244,6 +246,31 @@ static const char *uiLayoutDesc[] =
 uint8_t wifiModeIdx = NET_OFF;
 static const char *wifiModeDesc[] =
 { "Off", "AP Only", "AP+Connect", "Connect", "Sync Only" };
+
+//
+// Clock color options
+//
+const ClockColor clockColors[] =
+{
+  { 0x001F, "Blue" },
+  { 0xFD20, "Orange" },
+  { 0xF800, "Red" },
+  { 0xC618, "Grey" },
+  { 0x07E0, "Green" },
+  { 0xA145, "Brown" },
+  { 0x07FF, "Cyan" },
+  { 0xF81F, "Magenta" },
+  { 0xFFE0, "Yellow" },
+  { 0xFFFF, "White" },
+  { 0x0000, "Black" },
+  { 0x8410, "DarkGrey" },
+  { 0x5AEB, "LtBlue" },
+  { 0xFD10, "Pink" },
+  { 0x07F0, "Lime" },
+  { 0xFBE0, "Gold" },
+};
+
+int getTotalClockColors() { return(ITEM_COUNT(clockColors)); }
 
 //
 // Step Menu
@@ -556,6 +583,11 @@ static void doClockBrt(int dir)
   clockBrt = clamp_range(clockBrt, dir, 1, 50);
 }
 
+static void doClockColor(int dir)
+{
+  clockColorIdx = wrap_range(clockColorIdx, dir, 0, getTotalClockColors() - 1);
+}
+
 static void doSleep(int dir)
 {
   currentSleep = clamp_range(currentSleep, 5*dir, 0, 255);
@@ -822,6 +854,7 @@ static void clickSettings(int cmd, bool shortPress)
   {
     case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
     case MENU_CLOCKBRT:   currentCmd = CMD_CLOCKBRT; break;
+    case MENU_CLOCKCOLOR: currentCmd = CMD_CLOCKCOLOR; break;
     case MENU_CALIBRATION:
       if(isSSB()) currentCmd = CMD_CAL;
       break;
@@ -868,6 +901,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_SETTINGS:  doSettings(scrollDirection * dir);break;
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CLOCKBRT:  doClockBrt(dir);break;
+    case CMD_CLOCKCOLOR:doClockColor(dir);break;
     case CMD_CAL:       doCal(dir);break;
     case CMD_THEME:     doTheme(scrollDirection * dir);break;
     case CMD_UI:        doUILayout(scrollDirection * dir);break;
@@ -1422,6 +1456,16 @@ static void drawClockBrt(int x, int y, int sx)
   spr.drawNumber(clockBrt, 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawClockColor(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_CLOCKCOLOR], x, y, sx);
+  drawZoomedMenu(settings[MENU_CLOCKCOLOR]);
+  spr.setTextDatum(MC_DATUM);
+
+  spr.setTextColor(clockColors[clockColorIdx].color, TH.menu_bg);
+  spr.drawString(clockColors[clockColorIdx].name, 40+x+(sx/2), 60+y, 2);
+}
+
 static void drawSleep(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SLEEP], x, y, sx);
@@ -1577,6 +1621,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_FM_REGION: drawFmRegion(x, y, sx);  break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
     case CMD_CLOCKBRT:  drawClockBrt(x, y, sx);  break;
+    case CMD_CLOCKCOLOR:drawClockColor(x, y, sx);break;
     case CMD_RDS:       drawRDSMode(x, y, sx);   break;
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
