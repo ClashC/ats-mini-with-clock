@@ -229,8 +229,8 @@ static const uint8_t segDigits[10] =
   0x6F  // 9
 };
 
-static const int SEG_LEN  = 20;
-static const int SEG_W    = 4;
+static const int SEG_LEN  = 44;
+static const int SEG_W    = 10;
 static const int DIGIT_W  = SEG_LEN + SEG_W * 2;
 static const int DIGIT_H  = SEG_LEN * 2 + SEG_W * 3;
 static const int DIGIT_GAP = SEG_W;
@@ -301,12 +301,12 @@ void drawClockStandby()
   while(true)
   {
     // Draw clock with a fixed black background so it does not depend on theme
-    // colors. Use light grey digits on black to mimic a seven segment display.
+    // colors. Use grey digits on black to mimic a seven segment display.
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
     int w = sevenSegWidth(t);
-    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, TFT_LIGHTGREY);
+    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, 0xC618);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
