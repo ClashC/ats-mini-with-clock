@@ -184,6 +184,7 @@ void eepromSaveConfig()
   EEPROM.write(addr++, currentBrt >> 8);         // Stores the current Brightness value (HIGH byte)
   EEPROM.write(addr++, currentBrt & 0XFF);       // Stores the current Brightness value (LOW byte)
   EEPROM.write(addr++, clockBrt);                // Stores clock brightness
+  EEPROM.write(addr++, clockColorIdx);           // Stores clock color index
   EEPROM.write(addr++, FmAgcIdx);                // Stores the current FM AGC/ATTN index value
   EEPROM.write(addr++, AmAgcIdx);                // Stores the current AM AGC/ATTN index value
   EEPROM.write(addr++, SsbAgcIdx);               // Stores the current SSB AGC/ATTN index value
@@ -262,6 +263,7 @@ void eepromLoadConfig()
   currentBrt     = EEPROM.read(addr++) << 8;     // Reads stored Brightness value (HIGH byte)
   currentBrt    |= EEPROM.read(addr++);          // Reads stored Brightness value (LOW byte)
   clockBrt       = EEPROM.read(addr++);          // Reads stored clock brightness
+  clockColorIdx  = EEPROM.read(addr++);          // Reads stored clock color index
   FmAgcIdx       = EEPROM.read(addr++);          // Reads stored FM AGC/ATTN index value
   AmAgcIdx       = EEPROM.read(addr++);          // Reads stored AM AGC/ATTN index value
   SsbAgcIdx      = EEPROM.read(addr++);          // Reads stored SSB AGC/ATTN index value

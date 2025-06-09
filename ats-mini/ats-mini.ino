@@ -72,6 +72,7 @@ uint8_t FmRegionIdx = 0;                // FM Region
 
 uint16_t currentBrt = 130;              // Display brightness, range = 0 to 255 in steps of 5
 uint8_t  clockBrt   = 25;               // Clock brightness, range = 1 to 50
+uint8_t  clockColorIdx = 0;             // Clock color index
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
 bool zoomMenu = false;                  // Display zoomed menu item

@@ -14,7 +14,7 @@
 #define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),"
 #define AUTHORS_LINE4  "Marat Fayzullin"
 #define APP_VERSION    226  // FIRMWARE VERSION
-#define EEPROM_VERSION 73   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 74   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -114,6 +114,12 @@ typedef struct
   const char* desc;
 } FMRegion;
 
+typedef struct
+{
+  uint16_t color;       // RGB565 color value
+  const char *name;     // Color name
+} ClockColor;
+
 //
 // Global Variables
 //
@@ -136,6 +142,7 @@ extern uint8_t currentMode;
 extern uint16_t currentCmd;
 extern uint16_t currentBrt;
 extern uint8_t  clockBrt;
+extern uint8_t  clockColorIdx;
 extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
@@ -154,6 +161,8 @@ extern int8_t SsbSoftMuteIdx;
 extern uint8_t rdsModeIdx;
 extern uint8_t wifiModeIdx;
 extern uint8_t FmRegionIdx;
+extern const ClockColor clockColors[];
+int getTotalClockColors();
 
 extern int8_t agcIdx;
 extern int8_t agcNdx;
