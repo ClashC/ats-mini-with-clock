@@ -212,104 +212,12 @@ void drawLoadingSSB()
   spr.drawString("Loading SSB", 160, 62, 4);
   spr.pushSprite(0, 0);
 }
-
-//
-// Seven segment clock rendering helpers
-//
-static const uint8_t segDigits[10] =
-{
-  0x3F, // 0
-  0x06, // 1
-  0x5B, // 2
-  0x4F, // 3
-  0x66, // 4
-  0x6D, // 5
-  0x7D, // 6
-  0x07, // 7
-  0x7F, // 8
-  0x6F  // 9
-};
-
-static const int SEG_LEN  = 44;
-static const int SEG_W    = 10;
-static const int DIGIT_W  = SEG_LEN + SEG_W * 2;
-static const int DIGIT_H  = SEG_LEN * 2 + SEG_W * 3;
-static const int DIGIT_GAP = SEG_W;
-
-static void drawSeg(int x, int y, int w, int h, uint16_t c)
-{
-  spr.fillRect(x, y, w, h, c);
-}
-
-static void draw7SegChar(char ch, int x, int y, uint16_t col)
-{
-  if(ch == ' ')
-    return;
-
-  if(ch == '-')
-  {
-    drawSeg(x + SEG_W, y + SEG_LEN + SEG_W, SEG_LEN, SEG_W, col); // G
-    return;
-  }
-
-  if(ch == ':')
-  {
-    int cx = x + DIGIT_W / 2 - SEG_W / 2;
-    drawSeg(cx, y + SEG_W + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
-    drawSeg(cx, y + SEG_W * 2 + SEG_LEN + SEG_LEN / 2 - SEG_W / 2, SEG_W, SEG_W, col);
-    return;
-  }
-
-  if(ch < '0' || ch > '9')
-    return;
-
-  uint8_t mask = segDigits[ch - '0'];
-
-  if(mask & 0x01) drawSeg(x + SEG_W,             y,                        SEG_LEN, SEG_W, col);               // A
-  if(mask & 0x02) drawSeg(x + SEG_W + SEG_LEN,   y + SEG_W,                SEG_W,   SEG_LEN, col);             // B
-  if(mask & 0x04) drawSeg(x + SEG_W + SEG_LEN,   y + SEG_W * 2 + SEG_LEN,  SEG_W,   SEG_LEN, col);             // C
-  if(mask & 0x08) drawSeg(x + SEG_W,             y + SEG_W * 2 + SEG_LEN * 2, SEG_LEN, SEG_W, col);            // D
-  if(mask & 0x10) drawSeg(x,                     y + SEG_W * 2 + SEG_LEN,  SEG_W,   SEG_LEN, col);             // E
-  if(mask & 0x20) drawSeg(x,                     y + SEG_W,                SEG_W,   SEG_LEN, col);             // F
-  if(mask & 0x40) drawSeg(x + SEG_W,             y + SEG_W + SEG_LEN,      SEG_LEN, SEG_W, col);               // G
-}
-
-static int sevenSegWidth(const char *s)
-{
-  int w = 0;
-  for(const char *p = s; *p; ++p)
-  {
-    // The colon is visually narrower, so only count its actual width
-    // while keeping the gaps consistent.
-    w += (*p == ':' ? SEG_W : DIGIT_W);
-    if(p[1]) w += DIGIT_GAP;
-  }
-  return w;
-}
-
-static void drawSevenSegString(const char *s, int x, int y, uint16_t col)
-{
-  for(const char *p = s; *p; ++p)
-  {
-    if(*p == ':')
-    {
-      // Shift the colon left so it sits between digits with equal gaps.
-      draw7SegChar(*p, x - (DIGIT_W / 2 - SEG_W / 2), y, col);
-      x += SEG_W + DIGIT_GAP;
-    }
-    else
-    {
-      draw7SegChar(*p, x, y, col);
-      x += DIGIT_W + DIGIT_GAP;
-    }
-  }
-}
-
-//
+// Smooth seven segment font for standby clock
 // Display clock while in standby mode
 //
 void drawClockStandby()
 {
+  spr.loadFont("/fonts/DSEG7_118.vlw");
   while(true)
   {
     // Draw clock with a fixed black background so it does not depend on theme
@@ -317,8 +225,9 @@ void drawClockStandby()
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    int w = sevenSegWidth(t);
-    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, clockColors[clockColorIdx].color);
+    int w = spr.textWidth(t);
+    int h = spr.fontHeight();
+    spr.drawString(t, 160 - w / 2, 85 - h / 2);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
@@ -337,6 +246,7 @@ void drawClockStandby()
     if(exit) break;
     clockTickTime();
   }
+  spr.unloadFont();
 }
 
 //
@@ -344,14 +254,16 @@ void drawClockStandby()
 //
 void drawClockStandbySleep()
 {
+  spr.loadFont("/fonts/DSEG7_118.vlw");
   while(true)
   {
     // Draw clock similar to the normal standby mode
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    int w = sevenSegWidth(t);
-    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, clockColors[clockColorIdx].color);
+    int w = spr.textWidth(t);
+    int h = spr.fontHeight();
+    spr.drawString(t, 160 - w / 2, 85 - h / 2);
     spr.pushSprite(0, 0);
 
     // Enter light sleep for up to one minute or until the button is pressed
@@ -373,6 +285,7 @@ void drawClockStandbySleep()
 
     clockTickTime();
   }
+  spr.unloadFont();
 }
 
 //
