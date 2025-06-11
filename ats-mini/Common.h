@@ -35,6 +35,7 @@
 #define SLEEP_UNLOCKED 1 // Do not lock the encoder
 #define SLEEP_LIGHT    2 // ESP32 light sleep
 #define SLEEP_CLOCK    3 // Display clock on standby
+#define SLEEP_CLOCK_LS 4 // Clock with light sleep
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
@@ -182,6 +183,7 @@ uint8_t doAbout(int dir);
 // Draw.c
 void drawLoadingSSB();
 void drawClockStandby();
+void drawClockStandbySleep();
 void drawZoomedMenu(const char *text);
 void drawScreen(const char *statusLine1 = 0, const char *statusLine2 = 0);
 void drawAboutHelp(uint8_t arrow);
