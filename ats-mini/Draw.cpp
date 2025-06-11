@@ -339,6 +339,42 @@ void drawClockStandby()
 }
 
 //
+// Display clock while in standby mode with light sleep
+//
+void drawClockStandbySleep()
+{
+  while(true)
+  {
+    // Draw clock similar to the normal standby mode
+    spr.fillSprite(TFT_BLACK);
+    const char *t = clockGet();
+    if(!t) t = "--:--";
+    int w = sevenSegWidth(t);
+    drawSevenSegString(t, 160 - w / 2, 85 - DIGIT_H / 2, clockColors[clockColorIdx].color);
+    spr.pushSprite(0, 0);
+
+    // Enter light sleep for up to one minute or until the button is pressed
+    esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
+    esp_sleep_enable_timer_wakeup(60000000ULL);
+    rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
+    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+    esp_light_sleep_start();
+
+    // Wake-up handling
+    rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+    rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
+    pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
+
+    ButtonTracker::State st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
+    if(st.isLongPressed || st.wasShortPressed || st.wasClicked)
+      break;
+
+    clockTickTime();
+  }
+}
+
+//
 // Draw band and mode indicators
 //
 static void drawBandAndMode(const char *band, const char *mode, int x, int y)

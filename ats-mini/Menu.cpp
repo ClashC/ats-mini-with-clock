@@ -200,7 +200,7 @@ uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
 
 uint8_t sleepModeIdx = SLEEP_LOCKED;
 static const char *sleepModeDesc[] =
-{ "Locked", "Unlocked", "CPU Sleep", "Clock" };
+{ "Locked", "Unlocked", "CPU Sleep", "Clock", "Clock Sleep" };
 
 //
 // UTC Offset Menu
