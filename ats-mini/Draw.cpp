@@ -345,6 +345,9 @@ void drawClockStandbySleep()
 {
   while(true)
   {
+    // Ensure the display backlight is on after each wakeup
+    ledcWrite(PIN_LCD_BL, clockBrt * 5);
+
     // Draw clock similar to the normal standby mode
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
