@@ -8,6 +8,7 @@
 #include <LittleFS.h>
 #include <nvs.h>
 #include <nvs_flash.h>
+#include "driver/rtc_io.h"
 
 extern ButtonTracker pb1;
 
