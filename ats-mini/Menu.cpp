@@ -120,7 +120,10 @@ static const char *menu[] =
 #define MENU_SLEEPMODE    13
 #define MENU_LOADEIBI     14
 #define MENU_WIFIMODE     15
-#define MENU_ABOUT        16
+#define MENU_ALARM1       16
+#define MENU_ALARM2       17
+#define MENU_ALARMVOL     18
+#define MENU_ABOUT        19
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -142,6 +145,9 @@ static const char *settings[] =
   "Sleep Mode",
   "Load EiBi",
   "Wi-Fi",
+  "Alarm 1",
+  "Alarm 2",
+  "Alarm Vol",
   "About",
 };
 
@@ -527,6 +533,14 @@ static void clickSeek(bool shortPress)
   if(shortPress) seekMode(true); else currentCmd = CMD_NONE;
 }
 
+static void clickAlarm(int idx, bool shortPress)
+{
+  if(shortPress)
+    alarms[idx].enabled = !alarms[idx].enabled;
+  else
+    currentCmd = CMD_NONE;
+}
+
 static void doTheme(int dir)
 {
   themeIdx = wrap_range(themeIdx, dir, 0, getTotalThemes() - 1);
@@ -634,6 +648,22 @@ static void doScrollDir(int dir)
 static void doShowTemp(int dir)
 {
   showTemperature = !showTemperature;
+}
+
+void doAlarmTime(int idx, int dir)
+{
+  int m = alarms[idx].minute + dir;
+  int h = alarms[idx].hour;
+  while(m < 0) { m += 60; h = (h + 23) % 24; }
+  while(m >= 60) { m -= 60; h = (h + 1) % 24; }
+  alarms[idx].minute = m;
+  alarms[idx].hour = h;
+}
+
+void doAlarmVol(int dir)
+{
+  for(int i=0 ; i<2 ; ++i)
+    alarms[i].volume = clamp_range(alarms[i].volume, dir, 0, 63);
 }
 
 uint8_t doAbout(int dir)
@@ -868,6 +898,9 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
+    case MENU_ALARM1:     currentCmd = CMD_ALARM1;    break;
+    case MENU_ALARM2:     currentCmd = CMD_ALARM2;    break;
+    case MENU_ALARMVOL:   currentCmd = CMD_ALARMVOL;  break;
     case MENU_FM_REGION:
       // Only in FM mode
       if(currentMode==FM) currentCmd = CMD_FM_REGION;
@@ -910,6 +943,9 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_SLEEPMODE: doSleepMode(scrollDirection * dir);break;
     case CMD_WIFIMODE:  doWiFiMode(scrollDirection * dir);break;
+    case CMD_ALARM1:    doAlarmTime(0, dir);break;
+    case CMD_ALARM2:    doAlarmTime(1, dir);break;
+    case CMD_ALARMVOL:  doAlarmVol(dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_SCROLL:    doScrollDir(dir);break;
     case CMD_TEMPERATURE: doShowTemp(dir);break;
@@ -931,6 +967,8 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
     case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
     case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
+    case CMD_ALARM1:   clickAlarm(0, shortPress); break;
+    case CMD_ALARM2:   clickAlarm(1, shortPress); break;
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
     case CMD_SEEK:     clickSeek(shortPress); break;
@@ -1508,6 +1546,29 @@ static void drawShowTemp(int x, int y, int sx)
   spr.drawString(showTemperature ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawAlarm(int idx, int x, int y, int sx)
+{
+  drawCommon(settings[MENU_ALARM1 + idx], x, y, sx);
+  drawZoomedMenu(settings[MENU_ALARM1 + idx]);
+  spr.setTextDatum(MC_DATUM);
+
+  char buf[6];
+  sprintf(buf, "%02d:%02d", alarms[idx].hour, alarms[idx].minute);
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawString(buf, 40+x+(sx/2), 52+y, 4);
+  spr.drawString(alarms[idx].enabled ? "On" : "Off", 40+x+(sx/2), 82+y, 2);
+}
+
+static void drawAlarmVol(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_ALARMVOL], x, y, sx);
+  drawZoomedMenu(settings[MENU_ALARMVOL]);
+  spr.setTextDatum(MC_DATUM);
+
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawNumber(alarms[0].volume, 40+x+(sx/2), 60+y, 4);
+}
+
 static void drawInfo(int x, int y, int sx)
 {
   char text[16];
@@ -1627,6 +1688,9 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
     case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
+    case CMD_ALARM1:    drawAlarm(0, x, y, sx);  break;
+    case CMD_ALARM2:    drawAlarm(1, x, y, sx);  break;
+    case CMD_ALARMVOL:  drawAlarmVol(x, y, sx);  break;
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
     case CMD_TEMPERATURE:drawShowTemp(x, y, sx); break;
