@@ -246,6 +246,8 @@ void setup()
 
   // Connect WiFi, if necessary
   netInit(wifiModeIdx);
+  if(!clockAvailable())
+    clockReset();
 }
 
 //

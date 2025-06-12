@@ -10,6 +10,7 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 ### Added
 
 - Show DHCP-assigned IP address on the About system screen.
+- Start the clock from 00:00 until NTP or RDS time becomes available.
 
 
 ### Fixed

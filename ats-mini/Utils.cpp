@@ -28,7 +28,8 @@ float getInternalTemperature()
 }
 
 // Time
-static bool clockHasBeenSet = false;
+static bool clockHasBeenSet = false;   // TRUE when time was synchronized
+static bool clockInitialized = false;  // TRUE while internal clock is running
 static uint32_t clockTimer  = 0;
 static uint8_t clockSeconds = 0;
 static uint8_t clockMinutes = 0;
@@ -253,7 +254,7 @@ const char *clockGet()
   if(switchThemeEditor())
     return("00:00");
   else
-    return(clockHasBeenSet? clockText : NULL);
+    return((clockHasBeenSet || clockInitialized)? clockText : NULL);
 }
 
 bool clockGetHM(uint8_t *hours, uint8_t *minutes)
@@ -270,9 +271,10 @@ bool clockGetHM(uint8_t *hours, uint8_t *minutes)
 void clockReset()
 {
   clockHasBeenSet = false;
-  clockText[0] = '\0';
-  clockTimer = 0;
+  clockInitialized = true;
+  clockTimer = micros();
   clockHours = clockMinutes = clockSeconds = 0;
+  formatClock(0, 0);
 }
 
 static void formatClock(uint8_t hours, uint8_t minutes)
@@ -284,7 +286,7 @@ static void formatClock(uint8_t hours, uint8_t minutes)
 
 void clockRefreshTime()
 {
-  if(clockHasBeenSet) formatClock(clockHours, clockMinutes);
+  if(clockHasBeenSet || clockInitialized) formatClock(clockHours, clockMinutes);
 }
 
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
@@ -293,6 +295,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
   if(!clockHasBeenSet && hours < 24 && minutes < 60 && seconds < 60)
   {
     clockHasBeenSet = true;
+    clockInitialized = true;
     clockTimer   = micros();
     clockHours   = hours;
     clockMinutes = minutes;
@@ -308,8 +311,8 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
 
 bool clockTickTime()
 {
-  // Need to set the clock first, then accumulate one second of time
-  if(clockHasBeenSet && (micros() - clockTimer >= 1000000))
+  // If the clock is running, accumulate elapsed seconds
+  if(clockInitialized && (micros() - clockTimer >= 1000000))
   {
     uint32_t delta;
 
