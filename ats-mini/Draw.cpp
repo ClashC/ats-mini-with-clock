@@ -30,8 +30,9 @@ static const uint8_t sevenSegMap[10] =
 
 static void draw7SegDigit(char c, int x, int y, uint16_t color)
 {
-  static const int segLen = 16;
-  static const int segThick = 4;
+  // Increase the segment size for better readability
+  static const int segLen = 40;
+  static const int segThick = 10;
   int digit = c - '0';
   if(digit < 0 || digit > 9) return;
   uint8_t m = sevenSegMap[digit];
@@ -46,18 +47,18 @@ static void draw7SegDigit(char c, int x, int y, uint16_t color)
 
 static void draw7SegColon(int x, int y, uint16_t color)
 {
-  static const int segLen = 16;
-  static const int segThick = 4;
+  static const int segLen = 40;
+  static const int segThick = 10;
   int y1 = y + segThick + segLen/2 - segThick/2;
   int y2 = y + segThick*2 + segLen + segLen/2 - segThick/2;
   spr.fillRect(x, y1, segThick, segThick, color);
   spr.fillRect(x, y2, segThick, segThick, color);
 }
 
-static void draw7SegTime(const char *t, int cx, int cy)
+static void draw7SegTime(const char *t, int cx, int cy, uint16_t color)
 {
-  static const int segLen = 16;
-  static const int segThick = 4;
+  static const int segLen = 40;
+  static const int segThick = 10;
   static const int digitWidth = segLen + segThick * 2;
   static const int colonWidth = segThick;
   static const int gap = segThick;
@@ -79,12 +80,12 @@ static void draw7SegTime(const char *t, int cx, int cy)
     char c = t[i];
     if(c == ':')
     {
-      draw7SegColon(x, y, TFT_DARKGREY);
+      draw7SegColon(x, y, color);
       x += colonWidth + gap;
     }
     else if(isdigit((int)c))
     {
-      draw7SegDigit(c, x, y, TFT_DARKGREY);
+      draw7SegDigit(c, x, y, color);
       x += digitWidth + gap;
     }
   }
@@ -301,7 +302,7 @@ void drawClockStandby()
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    draw7SegTime(t, 160, 85);
+    draw7SegTime(t, 160, 85, clockColors[clockColorIdx].color);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
@@ -336,7 +337,7 @@ void drawClockStandbySleep()
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    draw7SegTime(t, 160, 85);
+    draw7SegTime(t, 160, 85, clockColors[clockColorIdx].color);
     spr.pushSprite(0, 0);
 
     // Enter light sleep for up to one minute or until the button is pressed
