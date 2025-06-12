@@ -268,6 +268,8 @@ bool clockGetHM(uint8_t *hours, uint8_t *minutes)
   }
 }
 
+static void formatClock(uint8_t hours, uint8_t minutes);
+
 void clockReset()
 {
   clockHasBeenSet = false;
