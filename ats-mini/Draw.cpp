@@ -28,21 +28,36 @@ static const uint8_t sevenSegMap[10] =
   0x6F  // 9
 };
 
+static void drawHSeg(int x, int y, int len, int thick, uint16_t color)
+{
+  int diag = thick / 2;
+  spr.fillRect(x + diag, y, len - diag * 2, thick, color);
+  spr.fillTriangle(x, y + thick / 2, x + diag, y, x + diag, y + thick, color);
+  spr.fillTriangle(x + len, y + thick / 2, x + len - diag, y, x + len - diag, y + thick, color);
+}
+
+static void drawVSeg(int x, int y, int len, int thick, uint16_t color)
+{
+  int diag = thick / 2;
+  spr.fillRect(x, y + diag, thick, len - diag * 2, color);
+  spr.fillTriangle(x + thick / 2, y, x, y + diag, x + thick, y + diag, color);
+  spr.fillTriangle(x + thick / 2, y + len, x, y + len - diag, x + thick, y + len - diag, color);
+}
+
 static void draw7SegDigit(char c, int x, int y, uint16_t color)
 {
-  // Increase the segment size for better readability
   static const int segLen = 40;
   static const int segThick = 10;
   int digit = c - '0';
   if(digit < 0 || digit > 9) return;
   uint8_t m = sevenSegMap[digit];
-  if(m & 0x01) spr.fillRect(x + segThick, y, segLen, segThick, color); // A
-  if(m & 0x02) spr.fillRect(x + segThick + segLen, y + segThick, segThick, segLen, color); // B
-  if(m & 0x04) spr.fillRect(x + segThick + segLen, y + segThick*2 + segLen, segThick, segLen, color); // C
-  if(m & 0x08) spr.fillRect(x + segThick, y + segThick*2 + segLen*2, segLen, segThick, color); // D
-  if(m & 0x10) spr.fillRect(x, y + segThick*2 + segLen, segThick, segLen, color); // E
-  if(m & 0x20) spr.fillRect(x, y + segThick, segThick, segLen, color); // F
-  if(m & 0x40) spr.fillRect(x + segThick, y + segThick + segLen, segLen, segThick, color); // G
+  if(m & 0x01) drawHSeg(x + segThick, y, segLen, segThick, color); // A
+  if(m & 0x02) drawVSeg(x + segThick + segLen, y + segThick, segLen, segThick, color); // B
+  if(m & 0x04) drawVSeg(x + segThick + segLen, y + segThick*2 + segLen, segLen, segThick, color); // C
+  if(m & 0x08) drawHSeg(x + segThick, y + segThick*2 + segLen*2, segLen, segThick, color); // D
+  if(m & 0x10) drawVSeg(x, y + segThick*2 + segLen, segLen, segThick, color); // E
+  if(m & 0x20) drawVSeg(x, y + segThick, segLen, segThick, color); // F
+  if(m & 0x40) drawHSeg(x + segThick, y + segThick + segLen, segLen, segThick, color); // G
 }
 
 static void draw7SegColon(int x, int y, uint16_t color)
