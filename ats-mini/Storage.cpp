@@ -11,6 +11,7 @@
 #define EEPROM_SETM_ADDR  0x080
 #define EEPROM_SET_ADDR   0x100
 #define EEPROM_SETP_ADDR  0x120
+#define EEPROM_ALARM_ADDR 0x174
 #define EEPROM_VER_ADDR   0x1F0
 
 static bool showEepromFlag   = false; // TRUE: Writing to EEPROM
@@ -215,6 +216,16 @@ void eepromSaveConfig()
     EEPROM.commit();
   }
 
+  addr = EEPROM_ALARM_ADDR;
+  for(int i=0 ; i<2 ; i++)
+  {
+    EEPROM.write(addr++, alarms[i].hour);
+    EEPROM.write(addr++, alarms[i].minute);
+    EEPROM.write(addr++, alarms[i].volume);
+    EEPROM.write(addr++, alarms[i].enabled);
+    EEPROM.commit();
+  }
+
   addr = EEPROM_VER_ADDR;
   EEPROM.write(addr++, APP_VERSION >> 8);        // Stores APP_VERSION (HIGH byte)
   EEPROM.write(addr++, APP_VERSION & 0XFF);      // Stores APP_VERSION (LOW byte)
@@ -291,6 +302,16 @@ void eepromLoadConfig()
     bands[i].bandCal  = EEPROM.read(addr++) << 8; // Reads stored Calibration value (HIGH byte) per band
     bands[i].bandCal |= EEPROM.read(addr++);      // Reads stored Calibration value (LOW byte) per band
     bands[i].bandMode = EEPROM.read(addr++);      // Reads stored Mode value per band
+  }
+
+  addr = EEPROM_ALARM_ADDR;
+  for(int i=0 ; i<2 ; i++)
+  {
+    alarms[i].hour    = EEPROM.read(addr++);
+    alarms[i].minute  = EEPROM.read(addr++);
+    alarms[i].volume  = EEPROM.read(addr++);
+    alarms[i].enabled = EEPROM.read(addr++);
+    alarms[i].triggered = false;
   }
 
   EEPROM.end();
