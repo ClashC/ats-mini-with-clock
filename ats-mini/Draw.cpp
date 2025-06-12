@@ -8,9 +8,87 @@
 #include <LittleFS.h>
 #include <nvs.h>
 #include <nvs_flash.h>
+#include <ctype.h>
 #include "driver/rtc_io.h"
 
 extern ButtonTracker pb1;
+
+// 7-segment digit bit masks (segments A-G)
+static const uint8_t sevenSegMap[10] =
+{
+  0x3F, // 0
+  0x06, // 1
+  0x5B, // 2
+  0x4F, // 3
+  0x66, // 4
+  0x6D, // 5
+  0x7D, // 6
+  0x07, // 7
+  0x7F, // 8
+  0x6F  // 9
+};
+
+static void draw7SegDigit(char c, int x, int y, uint16_t color)
+{
+  static const int segLen = 16;
+  static const int segThick = 4;
+  int digit = c - '0';
+  if(digit < 0 || digit > 9) return;
+  uint8_t m = sevenSegMap[digit];
+  if(m & 0x01) spr.fillRect(x + segThick, y, segLen, segThick, color); // A
+  if(m & 0x02) spr.fillRect(x + segThick + segLen, y + segThick, segThick, segLen, color); // B
+  if(m & 0x04) spr.fillRect(x + segThick + segLen, y + segThick*2 + segLen, segThick, segLen, color); // C
+  if(m & 0x08) spr.fillRect(x + segThick, y + segThick*2 + segLen*2, segLen, segThick, color); // D
+  if(m & 0x10) spr.fillRect(x, y + segThick*2 + segLen, segThick, segLen, color); // E
+  if(m & 0x20) spr.fillRect(x, y + segThick, segThick, segLen, color); // F
+  if(m & 0x40) spr.fillRect(x + segThick, y + segThick + segLen, segLen, segThick, color); // G
+}
+
+static void draw7SegColon(int x, int y, uint16_t color)
+{
+  static const int segLen = 16;
+  static const int segThick = 4;
+  int y1 = y + segThick + segLen/2 - segThick/2;
+  int y2 = y + segThick*2 + segLen + segLen/2 - segThick/2;
+  spr.fillRect(x, y1, segThick, segThick, color);
+  spr.fillRect(x, y2, segThick, segThick, color);
+}
+
+static void draw7SegTime(const char *t, int cx, int cy)
+{
+  static const int segLen = 16;
+  static const int segThick = 4;
+  static const int digitWidth = segLen + segThick * 2;
+  static const int colonWidth = segThick;
+  static const int gap = segThick;
+  static const int digitHeight = segThick * 3 + segLen * 2;
+
+  int total = 0;
+  size_t len = strlen(t);
+  for(size_t i=0;i<len;i++)
+  {
+    total += (t[i]==':') ? colonWidth : digitWidth;
+    if(i+1<len) total += gap;
+  }
+
+  int x = cx - total/2;
+  int y = cy - digitHeight/2;
+
+  for(size_t i=0;i<len;i++)
+  {
+    char c = t[i];
+    if(c == ':')
+    {
+      draw7SegColon(x, y, TFT_DARKGREY);
+      x += colonWidth + gap;
+    }
+    else if(isdigit((int)c))
+    {
+      draw7SegDigit(c, x, y, TFT_DARKGREY);
+      x += digitWidth + gap;
+    }
+  }
+}
 
 // Display position control
 #define MENU_OFFSET_X    0    // Menu horizontal offset
@@ -212,12 +290,10 @@ void drawLoadingSSB()
   spr.drawString("Loading SSB", 160, 62, 4);
   spr.pushSprite(0, 0);
 }
-// Smooth seven segment font for standby clock
-// Display clock while in standby mode
+// Draw seven segment clock while in standby mode
 //
 void drawClockStandby()
 {
-  spr.loadFont("/fonts/DSEG7_44.vlw");
   while(true)
   {
     // Draw clock with a fixed black background so it does not depend on theme
@@ -225,9 +301,7 @@ void drawClockStandby()
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    int w = spr.textWidth(t);
-    int h = spr.fontHeight();
-    spr.drawString(t, 160 - w / 2, 85 - h / 2);
+    draw7SegTime(t, 160, 85);
     spr.pushSprite(0, 0);
 
     uint32_t tm = millis();
@@ -246,15 +320,13 @@ void drawClockStandby()
     if(exit) break;
     clockTickTime();
   }
-  spr.unloadFont();
 }
 
 //
-// Display clock while in standby mode with light sleep
+// Draw seven segment clock while in standby mode with light sleep
 //
 void drawClockStandbySleep()
 {
-  spr.loadFont("/fonts/DSEG7_44.vlw");
   while(true)
   {
     // Ensure the display backlight is on after each wakeup
@@ -264,9 +336,7 @@ void drawClockStandbySleep()
     spr.fillSprite(TFT_BLACK);
     const char *t = clockGet();
     if(!t) t = "--:--";
-    int w = spr.textWidth(t);
-    int h = spr.fontHeight();
-    spr.drawString(t, 160 - w / 2, 85 - h / 2);
+    draw7SegTime(t, 160, 85);
     spr.pushSprite(0, 0);
 
     // Enter light sleep for up to one minute or until the button is pressed
@@ -288,7 +358,6 @@ void drawClockStandbySleep()
 
     clockTickTime();
   }
-  spr.unloadFont();
 }
 
 //
