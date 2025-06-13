@@ -1,4 +1,4 @@
-name: Build Firmware test2
+name: Build Firmware
 on:
   pull_request:
     branches:
