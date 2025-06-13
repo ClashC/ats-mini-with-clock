@@ -33,6 +33,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
 void clockReset();
 bool clockTickTime();
 void clockRefreshTime();
+bool checkAlarmTrigger();
 
 // Check if given memory entry belongs to a band
 bool isMemoryInBand(const Band *band, const Memory *memory);

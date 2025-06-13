@@ -333,7 +333,7 @@ void drawClockStandby()
       delay(50);
     }
 
-    if(exit) break;
+    if(exit || checkAlarmTrigger()) break;
     clockTickTime();
   }
 }
@@ -369,7 +369,7 @@ void drawClockStandbySleep()
     pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
 
     ButtonTracker::State st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
-    if(st.isLongPressed || st.wasShortPressed || st.wasClicked)
+    if(st.isLongPressed || st.wasShortPressed || st.wasClicked || checkAlarmTrigger())
       break;
 
     clockTickTime();
