@@ -156,16 +156,13 @@ bool sleepOn(int x)
   if((x==1) && !sleep_on)
   {
     sleep_on = true;
-    if(sleepModeIdx == SLEEP_CLOCK || sleepModeIdx == SLEEP_CLOCK_LS)
+    if(sleepModeIdx == SLEEP_CLOCK)
     {
       ledcWrite(PIN_LCD_BL, clockBrt * 5);
       while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
         delay(100);
       muteOn(true);
-      if(sleepModeIdx == SLEEP_CLOCK_LS)
-        drawClockStandbySleep();
-      else
-        drawClockStandby();
+      drawClockStandby();
       sleepOn(false);
     }
     else

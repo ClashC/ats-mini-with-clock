@@ -287,6 +287,8 @@ void eepromLoadConfig()
   themeIdx       = EEPROM.read(addr++);          // Reads stored Theme index value
   rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
   sleepModeIdx   = EEPROM.read(addr++);          // Reads stored Sleep Mode value
+  if(sleepModeIdx > SLEEP_CLOCK)
+    sleepModeIdx = SLEEP_LOCKED;                // Clamp to a valid value
   zoomMenu       = (bool)EEPROM.read(addr++);    // Reads stored Zoom Menu setting
   scrollDirection = EEPROM.read(addr++)? -1:1;   // Reads stored Scroll setting
   utcOffsetIdx   = EEPROM.read(addr++);          // Reads the current UTC Offset
