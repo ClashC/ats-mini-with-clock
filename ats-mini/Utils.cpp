@@ -161,6 +161,7 @@ bool sleepOn(int x)
       ledcWrite(PIN_LCD_BL, clockBrt * 5);
       while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
         delay(100);
+      muteOn(true);
       if(sleepModeIdx == SLEEP_CLOCK_LS)
         drawClockStandbySleep();
       else
@@ -231,6 +232,7 @@ bool sleepOn(int x)
     tft.writecommand(ST7789_DISPON);
     drawScreen();
     ledcWrite(PIN_LCD_BL, currentBrt);
+    muteOn(false);
     // Wait till the button is released to prevent the main loop clicks
     pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
     while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
@@ -469,4 +471,32 @@ int getInterpolatedStrength(int rssi) {
   }
 
   return values[num_thresholds - 1];
+}
+
+//
+// Check if any alarm should trigger and react
+//
+void checkAlarmTrigger()
+{
+  static uint8_t lastAlarmMinute = 60;
+  uint8_t ch, cm;
+
+  if(clockGetHM(&ch, &cm) && cm != lastAlarmMinute)
+  {
+    lastAlarmMinute = cm;
+    if(ch == 0 && cm == 0)
+      for(int i = 0; i < 2; ++i) alarms[i].triggered = false;
+
+    for(int i = 0; i < 2; ++i)
+    {
+      if(alarms[i].enabled && !alarms[i].triggered &&
+         alarms[i].hour == ch && alarms[i].minute == cm)
+      {
+        sleepOn(false);
+        muteOn(false);
+        rx.setVolume(alarms[i].volume);
+        alarms[i].triggered = true;
+      }
+    }
+  }
 }
