@@ -78,7 +78,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Show Temp** - Toggle displaying the internal CPU temperature.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
-* **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode; Clock - keep the display on and show the current time; Clock Sleep - keep the clock visible while the CPU enters light sleep between updates. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA. Clock Sleep reduces the consumption further, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
+* **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode; Clock - keep the display on and show the current time. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA. Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
 * **Load EiBi** - download the EiBi [schedule](#schedule) (requires Wi-Fi internet connection).
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
 * **Alarm 1** - Wake time for the first alarm. Rotate to set minutes, short press to toggle On/Off.
