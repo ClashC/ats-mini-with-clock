@@ -209,7 +209,6 @@ float getInternalTemperature();
 const char *getStationName();
 const char *getRadioText();
 const char *getProgramInfo();
-const char *getRdsTime();
 uint16_t getRdsPiCode();
 void clearStationInfo();
 bool checkRds();
