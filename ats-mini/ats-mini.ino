@@ -897,26 +897,7 @@ void loop()
   // Tick NETWORK time, connecting to WiFi if requested
   netTickTime();
 
-  static uint8_t lastAlarmMinute = 60;
-  uint8_t ch, cm;
-  if(clockGetHM(&ch, &cm) && cm != lastAlarmMinute)
-  {
-    lastAlarmMinute = cm;
-    if(ch==0 && cm==0)
-      for(int i=0;i<2;i++) alarms[i].triggered = false;
-
-    for(int i=0;i<2;i++)
-    {
-      if(alarms[i].enabled && !alarms[i].triggered &&
-         alarms[i].hour==ch && alarms[i].minute==cm)
-      {
-        sleepOn(false);
-        muteOn(false);
-        rx.setVolume(alarms[i].volume);
-        alarms[i].triggered = true;
-      }
-    }
-  }
+  checkAlarmTrigger();
 
 #ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
