@@ -35,9 +35,6 @@ bool clockTickTime();
 void clockRefreshTime();
 bool checkAlarmTrigger();
 
-// Alarm handling
-void checkAlarmTrigger();
-
 // Check if given memory entry belongs to a band
 bool isMemoryInBand(const Band *band, const Memory *memory);
 
