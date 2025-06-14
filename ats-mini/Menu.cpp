@@ -652,12 +652,22 @@ static void doShowTemp(int dir)
 
 void doAlarmTime(int idx, int dir)
 {
-  int m = alarms[idx].minute + dir;
-  int h = alarms[idx].hour;
-  while(m < 0) { m += 60; h = (h + 23) % 24; }
-  while(m >= 60) { m -= 60; h = (h + 1) % 24; }
-  alarms[idx].minute = m;
-  alarms[idx].hour = h;
+  if(pushAndRotate)
+  {
+    int h = alarms[idx].hour + dir;
+    while(h < 0) h += 24;
+    while(h >= 24) h -= 24;
+    alarms[idx].hour = h;
+  }
+  else
+  {
+    int m = alarms[idx].minute + dir;
+    int h = alarms[idx].hour;
+    while(m < 0) { m += 60; h = (h + 23) % 24; }
+    while(m >= 60) { m -= 60; h = (h + 1) % 24; }
+    alarms[idx].minute = m;
+    alarms[idx].hour = h;
+  }
 }
 
 void doAlarmVol(int dir)
