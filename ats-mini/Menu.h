@@ -48,6 +48,8 @@
 #define CMD_ALARM2    0x3000 // |
 #define CMD_ALARMVOL  0x3100 // |
 #define CMD_ABOUT     0x3200 //-+
+#define CMD_SETTIME   0x3300 // |
+#define CMD_TIMESYNC  0x3400 //-+
 
 // UI Layouts
 #define UI_DEFAULT  0

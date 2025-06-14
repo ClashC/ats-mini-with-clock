@@ -197,6 +197,7 @@ void eepromSaveConfig()
   EEPROM.write(addr++, currentSleep & 0XFF);     // Stores the current Sleep value (LOW byte)
   EEPROM.write(addr++, themeIdx);                // Stores the current Theme index value
   EEPROM.write(addr++, rdsModeIdx);              // Stores the current RDS Mode value
+  EEPROM.write(addr++, timeSyncIdx);             // Stores the current Time Sync mode
   EEPROM.write(addr++, sleepModeIdx);            // Stores the current Sleep Mode value
   EEPROM.write(addr++, (uint8_t)zoomMenu);       // Stores the current Zoom Menu setting
   EEPROM.write(addr++, scrollDirection<0? 1:0);  // Stores the current Scroll setting
@@ -286,6 +287,7 @@ void eepromLoadConfig()
   currentSleep  |= EEPROM.read(addr++);          // Reads stored Sleep value (LOW byte)
   themeIdx       = EEPROM.read(addr++);          // Reads stored Theme index value
   rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
+  timeSyncIdx    = EEPROM.read(addr++);          // Reads stored Time Sync mode
   sleepModeIdx   = EEPROM.read(addr++);          // Reads stored Sleep Mode value
   if(sleepModeIdx > SLEEP_CLOCK)
     sleepModeIdx = SLEEP_LOCKED;                // Clamp to a valid value

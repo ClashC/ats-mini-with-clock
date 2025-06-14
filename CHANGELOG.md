@@ -12,6 +12,7 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 - Show DHCP-assigned IP address on the About system screen.
 - Start the clock from 00:00 until NTP or RDS time becomes available.
 - Dual-alarm wake function.
+- Manual time setting and configurable synchronization source (Manual, RDS, NTP).
 
 
 ### Fixed
