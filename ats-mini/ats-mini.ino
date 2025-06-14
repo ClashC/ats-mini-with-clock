@@ -897,8 +897,6 @@ void loop()
   // Tick NETWORK time, connecting to WiFi if requested
   netTickTime();
 
-  checkAlarmTrigger();
-
 #ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
@@ -910,6 +908,7 @@ void loop()
 
   // Run clock
   needRedraw |= clockTickTime();
+  checkAlarmTrigger();
 
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh
