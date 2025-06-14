@@ -79,6 +79,8 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Show Temp** - Toggle displaying the internal CPU temperature.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode; Clock - keep the display on and show the current time. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA. Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
+* **Set Time** - Manually adjust the current clock time when automatic synchronization is disabled. Rotate to set minutes, hold the encoder button while rotating to set hours.
+* **Time Sync** - Choose how the clock is synchronized: Manual, RDS, or NTP.
 * **Load EiBi** - download the EiBi [schedule](#schedule) (requires Wi-Fi internet connection).
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
 * **Alarm 1** - Wake time for the first alarm. Rotate to set minutes, hold the encoder button while rotating to set hours. Short press toggles On/Off.
@@ -129,7 +131,7 @@ The receiver can download the [EiBi](http://eibispace.de/dx/eibi.txt) shortwave 
 
 * The schedule only needs to be downloaded once via [Wi-Fi](#wi-fi). It will be stored in the receiver's flash memory so it doesn't need to be fetched every time the device powers on.
 * To display scheduled stations correctly, the receiver’s clock must be set. The simplest and most battery-preserving way is to configure a Wi-Fi internet connection and then switch it to Sync Only mode. The UTC offset setting doesn’t matter, as the receiver syncs via NTP in UTC. A less reliable alternative is to use RDS CT, but this requires finding a station that broadcasts UTC time (not local time).
-* If no valid time is available yet, the clock starts from **00:00** and runs until either NTP or RDS time is received.
+* If no valid time is available yet, the clock starts from **00:00** and runs until the time is set manually or synchronized according to the selected mode.
 * Once set up, the receiver will display station names currently broadcasting on specific frequencies (only scheduled times are considered; days of the week are ignored for now).
 * You can quickly jump between stations using the Seek mode (marked by a clock icon). To switch between modes, short press the encoder while in Seek mode.
 

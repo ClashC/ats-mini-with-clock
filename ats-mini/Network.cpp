@@ -194,13 +194,16 @@ void netInit(uint8_t netMode, bool showStatus)
     // Let user see connection status if successful
     if(netMode!=NET_SYNC && showStatus) delay(2000);
 
-    // NTP time updates will happen every 5 minutes
-    ntpClient.setUpdateInterval(5*60*1000);
+    if(timeSyncIdx == TIME_NTP)
+    {
+      // NTP time updates will happen every 5 minutes
+      ntpClient.setUpdateInterval(5*60*1000);
 
-    // Get NTP time from the network
-    clockReset();
-    for(int j=0 ; j<10 ; j++)
-      if(ntpSyncTime()) break; else delay(500);
+      // Get NTP time from the network
+      clockReset();
+      for(int j=0 ; j<10 ; j++)
+        if(ntpSyncTime()) break; else delay(500);
+    }
   }
 
   // If only connected to sync...
@@ -222,7 +225,7 @@ void netInit(uint8_t netMode, bool showStatus)
 //
 bool ntpIsAvailable()
 {
-  return(ntpClient.isTimeSet());
+  return(timeSyncIdx==TIME_NTP && ntpClient.isTimeSet());
 }
 
 //
@@ -230,6 +233,7 @@ bool ntpIsAvailable()
 //
 bool ntpSyncTime()
 {
+  if(timeSyncIdx != TIME_NTP) return(false);
   if(WiFi.status()==WL_CONNECTED)
   {
     ntpClient.update();

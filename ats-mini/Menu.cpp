@@ -118,12 +118,14 @@ static const char *menu[] =
 #define MENU_SHOWTEMP     11
 #define MENU_SLEEP        12
 #define MENU_SLEEPMODE    13
-#define MENU_LOADEIBI     14
-#define MENU_WIFIMODE     15
-#define MENU_ALARM1       16
-#define MENU_ALARM2       17
-#define MENU_ALARMVOL     18
-#define MENU_ABOUT        19
+#define MENU_SETTIME      14
+#define MENU_TIMESYNC     15
+#define MENU_LOADEIBI     16
+#define MENU_WIFIMODE     17
+#define MENU_ALARM1       18
+#define MENU_ALARM2       19
+#define MENU_ALARMVOL     20
+#define MENU_ABOUT        21
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -143,6 +145,8 @@ static const char *settings[] =
   "Show Temp",
   "Sleep",
   "Sleep Mode",
+  "Set Time",
+  "Time Sync",
   "Load EiBi",
   "Wi-Fi",
   "Alarm 1",
@@ -252,6 +256,10 @@ static const char *uiLayoutDesc[] =
 uint8_t wifiModeIdx = NET_OFF;
 static const char *wifiModeDesc[] =
 { "Off", "AP Only", "AP+Connect", "Connect", "Sync Only" };
+
+// Time synchronization menu
+uint8_t timeSyncIdx = TIME_NTP;
+static const char *timeSyncDesc[] = { "Manual", "RDS", "NTP" };
 
 //
 // Clock color options
@@ -612,6 +620,35 @@ static void doSleepMode(int dir)
   sleepModeIdx = wrap_range(sleepModeIdx, dir, 0, LAST_ITEM(sleepModeDesc));
 }
 
+static void doSetTime(int dir)
+{
+  uint8_t h = 0, m = 0;
+  clockGetHM(&h, &m);
+  if(pushAndRotate)
+  {
+    int hh = h + dir;
+    while(hh < 0) hh += 24;
+    while(hh >= 24) hh -= 24;
+    h = hh;
+  }
+  else
+  {
+    int mm = m + dir;
+    int hh = h;
+    while(mm < 0) { mm += 60; hh = (hh + 23) % 24; }
+    while(mm >= 60) { mm -= 60; hh = (hh + 1) % 24; }
+    m = mm;
+    h = hh;
+  }
+  clockSet(h, m);
+}
+
+static void doTimeSync(int dir)
+{
+  timeSyncIdx = wrap_range(timeSyncIdx, dir, 0, LAST_ITEM(timeSyncDesc));
+  if(timeSyncIdx != TIME_MANUAL) clockReset();
+}
+
 static void doWiFiMode(int dir)
 {
   wifiModeIdx = wrap_range(wifiModeIdx, dir, 0, LAST_ITEM(wifiModeDesc));
@@ -906,6 +943,8 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_SHOWTEMP:   currentCmd = CMD_TEMPERATURE;break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
+    case MENU_SETTIME:    currentCmd = CMD_SETTIME;   break;
+    case MENU_TIMESYNC:   currentCmd = CMD_TIMESYNC;  break;
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
     case MENU_ALARM1:     currentCmd = CMD_ALARM1;    break;
@@ -952,6 +991,8 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_MEMORY:    doMemory(scrollDirection * dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_SLEEPMODE: doSleepMode(scrollDirection * dir);break;
+    case CMD_SETTIME:   doSetTime(dir);break;
+    case CMD_TIMESYNC:  doTimeSync(scrollDirection * dir);break;
     case CMD_WIFIMODE:  doWiFiMode(scrollDirection * dir);break;
     case CMD_ALARM1:    doAlarmTime(0, dir);break;
     case CMD_ALARM2:    doAlarmTime(1, dir);break;
@@ -1579,6 +1620,39 @@ static void drawAlarmVol(int x, int y, int sx)
   spr.drawNumber(alarms[0].volume, 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawSetTime(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_SETTIME], x, y, sx);
+  drawZoomedMenu(settings[MENU_SETTIME]);
+  spr.setTextDatum(MC_DATUM);
+
+  uint8_t h = 0, m = 0;
+  clockGetHM(&h, &m);
+  char buf[6];
+  sprintf(buf, "%02d:%02d", h, m);
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawString(buf, 40+x+(sx/2), 60+y, 4);
+}
+
+static void drawTimeSync(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_TIMESYNC], x, y, sx, true);
+
+  int count = ITEM_COUNT(timeSyncDesc);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(timeSyncDesc[abs((timeSyncIdx+count+i)%count)]);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(timeSyncDesc[abs((timeSyncIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
 static void drawInfo(int x, int y, int sx)
 {
   char text[16];
@@ -1697,6 +1771,8 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
+    case CMD_SETTIME:   drawSetTime(x, y, sx);   break;
+    case CMD_TIMESYNC:  drawTimeSync(x, y, sx);  break;
     case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
     case CMD_ALARM1:    drawAlarm(0, x, y, sx);  break;
     case CMD_ALARM2:    drawAlarm(1, x, y, sx);  break;

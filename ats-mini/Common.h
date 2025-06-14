@@ -14,7 +14,7 @@
 #define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),"
 #define AUTHORS_LINE4  "Marat Fayzullin"
 #define APP_VERSION    226  // FIRMWARE VERSION
-#define EEPROM_VERSION 75   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 76   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -67,6 +67,11 @@
 #define NET_AP_CONNECT 2 // Create access point, connect to a network normally, if possible
 #define NET_CONNECT    3 // Connect to a network normally, if possible
 #define NET_SYNC       4 // Connect to sync time, then disconnect
+
+// Time synchronization modes
+#define TIME_MANUAL    0 // Set time manually
+#define TIME_RDS       1 // Synchronize time via RDS
+#define TIME_NTP       2 // Synchronize time via NTP
 
 //
 // Data Types
@@ -170,6 +175,7 @@ extern int8_t AmSoftMuteIdx;
 extern int8_t SsbSoftMuteIdx;
 extern uint8_t rdsModeIdx;
 extern uint8_t wifiModeIdx;
+extern uint8_t timeSyncIdx;
 extern uint8_t FmRegionIdx;
 extern const ClockColor clockColors[];
 int getTotalClockColors();
