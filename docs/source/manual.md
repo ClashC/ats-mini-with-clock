@@ -81,14 +81,14 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode; Clock - keep the display on and show the current time. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA. Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
 * **Load EiBi** - download the EiBi [schedule](#schedule) (requires Wi-Fi internet connection).
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
-* **Alarm 1** - Wake time for the first alarm. Rotate to set minutes, short press to toggle On/Off.
+* **Alarm 1** - Wake time for the first alarm. Rotate to set minutes, hold the encoder button while rotating to set hours. Short press toggles On/Off.
 * **Alarm 2** - Second alarm time, works the same as Alarm 1.
 * **Alarm Vol** - Volume level when an alarm triggers.
 * **About** - Informational screens (Help, Authors, System).
 
 ## Alarm
 
-Use **Alarm 1** and **Alarm 2** in the Settings menu to set wake up times. Rotate the encoder to adjust the minutes; the hours will roll over automatically. Short press toggles the alarm on or off. The **Alarm Vol** item defines the volume level used when an alarm activates.
+Use **Alarm 1** and **Alarm 2** in the Settings menu to set wake up times. Rotate the encoder to adjust the minutes. Hold the encoder button while rotating to adjust the hours. Short press toggles the alarm on or off. The **Alarm Vol** item defines the volume level used when an alarm activates.
 
 ## Wi-Fi
 
