@@ -70,7 +70,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Clock Brightness** - Standby clock display brightness (1...50). Does not affect the normal radio brightness.
 * **Calibration** - SSB calibration offset (-2000...2000, per band).
 * **RDS** - Radio Data System options: PS - radio station name, CT - time, RT - text, PTY - genre, ALL (EU/US) - everything. Note that the time can be transmitted either in UTC or in local timezone, as well as be completely bogus. The clock is synchronized only once, so you can pick the right time source (switch the receiver power off and on to resync it again).
-* **UTC Offset** - Affects the displayed time, whether it was received via RDS or NTP.
+* **UTC Offset** - Affects both the displayed time and alarm triggers, whether the time was received via RDS or NTP.
 * **FM Region** - FM de-emphasis time constant by region (50µs for EU/JP/AU and 70µs for the US).
 * **Theme** - Color theme.
 * **UI Layout** - Alternative UI layouts. For now there is just one alternative UI with large S-meter and S/N-meter.

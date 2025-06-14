@@ -352,19 +352,22 @@ bool checkAlarmTrigger()
   static uint8_t lastAlarmMinute = 60;
   uint8_t ch, cm;
 
-  if(clockGetHM(&ch, &cm) && cm != lastAlarmMinute)
-  {
+  if (clockGetHM(&ch, &cm) && cm != lastAlarmMinute) {
     lastAlarmMinute = cm;
 
-    // Reset alarm triggers at midnight
-    if(ch==0 && cm==0)
-      for(int i=0;i<2;i++) alarms[i].triggered = false;
+    // Convert to local time using the currently selected UTC offset
+    int t = (int)ch * 60 + cm + getCurrentUTCOffset() * 30;
+    if (t < 0) t += 24 * 60;
+    uint8_t lch = (t / 60) % 24;
+    uint8_t lcm = t % 60;
 
-    for(int i=0;i<2;i++)
-    {
-      if(alarms[i].enabled && !alarms[i].triggered &&
-         alarms[i].hour==ch && alarms[i].minute==cm)
-      {
+    // Reset alarm triggers at local midnight
+    if (lch == 0 && lcm == 0)
+      for (int i = 0; i < 2; i++) alarms[i].triggered = false;
+
+    for (int i = 0; i < 2; i++) {
+      if (alarms[i].enabled && !alarms[i].triggered && alarms[i].hour == lch &&
+          alarms[i].minute == lcm) {
         sleepOn(false);
         muteOn(false);
         rx.setVolume(alarms[i].volume);
