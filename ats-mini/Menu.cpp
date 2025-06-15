@@ -366,18 +366,18 @@ static uint8_t freqInputPos = 0;
 enum AlarmEditStage { ALARM_EDIT_MINUTES = 0, ALARM_EDIT_HOURS, ALARM_EDIT_ENABLE };
 static int8_t alarmEditStage = ALARM_EDIT_MINUTES;
 static int8_t alarmEditIdx = -1;
-static bool alarmBlinkState = false;
 static uint32_t alarmBlinkTimer = 0;
 
+// Return true when the active field should be hidden
 static bool alarmBlink()
 {
-  uint32_t now = millis();
-  if(now - alarmBlinkTimer > 500)
-  {
-    alarmBlinkTimer = now;
-    alarmBlinkState = !alarmBlinkState;
-  }
-  return alarmBlinkState;
+  // The active field should be hidden only during the last quarter of
+  // each second. Use a modulo operation so the blink period remains
+  // constant regardless of when the timer was started.
+  const uint32_t cycle = 1000;         // total blink cycle in ms
+  const uint32_t offTime = cycle / 4;  // last quarter is hidden
+
+  return ((millis() - alarmBlinkTimer) % cycle) >= (cycle - offTime);
 }
 
 static uint8_t getDefaultFreqInputPos(int mode, int step)
@@ -565,18 +565,21 @@ static void clickAlarm(int idx, bool shortPress)
     currentCmd = CMD_NONE;
     alarmEditIdx = -1;
     alarmEditStage = ALARM_EDIT_MINUTES;
+    alarmBlinkTimer = millis();
     return;
   }
 
   if(alarmEditStage < ALARM_EDIT_ENABLE)
   {
     alarmEditStage = (AlarmEditStage)(alarmEditStage + 1);
+    alarmBlinkTimer = millis();
   }
   else
   {
     currentCmd = CMD_NONE;
     alarmEditIdx = -1;
     alarmEditStage = ALARM_EDIT_MINUTES;
+    alarmBlinkTimer = millis();
   }
 }
 
@@ -990,11 +993,13 @@ static void clickSettings(int cmd, bool shortPress)
       currentCmd = CMD_ALARM1;
       alarmEditIdx = 0;
       alarmEditStage = ALARM_EDIT_MINUTES;
+      alarmBlinkTimer = millis();
       break;
     case MENU_ALARM2:
       currentCmd = CMD_ALARM2;
       alarmEditIdx = 1;
       alarmEditStage = ALARM_EDIT_MINUTES;
+      alarmBlinkTimer = millis();
       break;
     case MENU_ALARMVOL:   currentCmd = CMD_ALARMVOL;  break;
     case MENU_FM_REGION:
