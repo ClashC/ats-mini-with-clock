@@ -363,6 +363,23 @@ static int getLastStep(int mode)
 
 static uint8_t freqInputPos = 0;
 
+enum AlarmEditStage { ALARM_EDIT_MINUTES = 0, ALARM_EDIT_HOURS, ALARM_EDIT_ENABLE };
+static int8_t alarmEditStage = ALARM_EDIT_MINUTES;
+static int8_t alarmEditIdx = -1;
+static uint32_t alarmBlinkTimer = 0;
+
+static bool alarmBlink()
+{
+  const uint32_t cycle = 1000;         // total blink cycle in ms
+  const uint32_t offTime = cycle / 4;  // last quarter is hidden
+
+  uint32_t now = millis();
+  if (now - alarmBlinkTimer >= cycle)
+    alarmBlinkTimer = now;
+
+  return now - alarmBlinkTimer >= (cycle - offTime);
+}
+
 static uint8_t getDefaultFreqInputPos(int mode, int step)
 {
   return (uint8_t)(log10(step) * 2) + (mode == AM ? 6 : 0);
@@ -543,10 +560,27 @@ static void clickSeek(bool shortPress)
 
 static void clickAlarm(int idx, bool shortPress)
 {
-  if(shortPress)
-    alarms[idx].enabled = !alarms[idx].enabled;
-  else
+  if(!shortPress)
+  {
     currentCmd = CMD_NONE;
+    alarmEditIdx = -1;
+    alarmEditStage = ALARM_EDIT_MINUTES;
+    alarmBlinkTimer = millis();
+    return;
+  }
+
+  if(alarmEditStage < ALARM_EDIT_ENABLE)
+  {
+    alarmEditStage = (AlarmEditStage)(alarmEditStage + 1);
+    alarmBlinkTimer = millis();
+  }
+  else
+  {
+    currentCmd = CMD_NONE;
+    alarmEditIdx = -1;
+    alarmEditStage = ALARM_EDIT_MINUTES;
+    alarmBlinkTimer = millis();
+  }
 }
 
 static void doTheme(int dir)
@@ -689,21 +723,29 @@ static void doShowTemp(int dir)
 
 void doAlarmTime(int idx, int dir)
 {
-  if(pushAndRotate)
+  switch(alarmEditStage)
   {
-    int h = alarms[idx].hour + dir;
-    while(h < 0) h += 24;
-    while(h >= 24) h -= 24;
-    alarms[idx].hour = h;
-  }
-  else
-  {
-    int m = alarms[idx].minute + dir;
-    int h = alarms[idx].hour;
-    while(m < 0) { m += 60; h = (h + 23) % 24; }
-    while(m >= 60) { m -= 60; h = (h + 1) % 24; }
-    alarms[idx].minute = m;
-    alarms[idx].hour = h;
+    case ALARM_EDIT_MINUTES:
+    {
+      int m = alarms[idx].minute + dir;
+      int h = alarms[idx].hour;
+      while(m < 0) { m += 60; h = (h + 23) % 24; }
+      while(m >= 60) { m -= 60; h = (h + 1) % 24; }
+      alarms[idx].minute = m;
+      alarms[idx].hour = h;
+      break;
+    }
+    case ALARM_EDIT_HOURS:
+    {
+      int h = alarms[idx].hour + dir;
+      while(h < 0) h += 24;
+      while(h >= 24) h -= 24;
+      alarms[idx].hour = h;
+      break;
+    }
+    case ALARM_EDIT_ENABLE:
+      if(dir) alarms[idx].enabled = !alarms[idx].enabled;
+      break;
   }
 }
 
@@ -947,8 +989,18 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_TIMESYNC:   currentCmd = CMD_TIMESYNC;  break;
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
-    case MENU_ALARM1:     currentCmd = CMD_ALARM1;    break;
-    case MENU_ALARM2:     currentCmd = CMD_ALARM2;    break;
+    case MENU_ALARM1:
+      currentCmd = CMD_ALARM1;
+      alarmEditIdx = 0;
+      alarmEditStage = ALARM_EDIT_MINUTES;
+      alarmBlinkTimer = millis();
+      break;
+    case MENU_ALARM2:
+      currentCmd = CMD_ALARM2;
+      alarmEditIdx = 1;
+      alarmEditStage = ALARM_EDIT_MINUTES;
+      alarmBlinkTimer = millis();
+      break;
     case MENU_ALARMVOL:   currentCmd = CMD_ALARMVOL;  break;
     case MENU_FM_REGION:
       // Only in FM mode
@@ -1601,13 +1653,36 @@ static void drawAlarm(int idx, int x, int y, int sx)
 {
   drawCommon(settings[MENU_ALARM1 + idx], x, y, sx);
   drawZoomedMenu(settings[MENU_ALARM1 + idx]);
-  spr.setTextDatum(MC_DATUM);
 
-  char buf[6];
-  sprintf(buf, "%02d:%02d", alarms[idx].hour, alarms[idx].minute);
+  int cx = 40+x+(sx/2);
+  int ty = 52+y;
+
+  spr.setTextDatum(TL_DATUM);
+
+  int fullw = spr.textWidth("00:00", 4);
+  int startx = cx - fullw/2;
+
+  // Hours
+  char buf[3];
+  sprintf(buf, "%02d", alarms[idx].hour);
+  spr.setTextColor((idx==alarmEditIdx && alarmEditStage==ALARM_EDIT_HOURS && alarmBlink()) ? TH.menu_bg : TH.menu_param, TH.menu_bg);
+  spr.drawString(buf, startx, ty, 4);
+  startx += spr.textWidth("00", 4);
+
+  // Colon
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawString(buf, 40+x+(sx/2), 52+y, 4);
-  spr.drawString(alarms[idx].enabled ? "On" : "Off", 40+x+(sx/2), 82+y, 2);
+  spr.drawString(":", startx, ty, 4);
+  startx += spr.textWidth(":", 4);
+
+  // Minutes
+  sprintf(buf, "%02d", alarms[idx].minute);
+  spr.setTextColor((idx==alarmEditIdx && alarmEditStage==ALARM_EDIT_MINUTES && alarmBlink()) ? TH.menu_bg : TH.menu_param, TH.menu_bg);
+  spr.drawString(buf, startx, ty, 4);
+
+  // Enabled
+  spr.setTextDatum(MC_DATUM);
+  spr.setTextColor((idx==alarmEditIdx && alarmEditStage==ALARM_EDIT_ENABLE && alarmBlink()) ? TH.menu_bg : TH.menu_param, TH.menu_bg);
+  spr.drawString(alarms[idx].enabled ? "On" : "Off", cx, 82+y, 2);
 }
 
 static void drawAlarmVol(int x, int y, int sx)

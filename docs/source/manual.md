@@ -83,14 +83,14 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Time Sync** - Choose how the clock is synchronized: Manual, RDS, or NTP.
 * **Load EiBi** - download the EiBi [schedule](#schedule) (requires Wi-Fi internet connection).
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
-* **Alarm 1** - Wake time for the first alarm. Rotate to set minutes, hold the encoder button while rotating to set hours. Short press toggles On/Off.
+* **Alarm 1** - Wake time for the first alarm. Press the encoder to switch between minutes, hours, and the On/Off flag. The active value blinks while being edited and can be adjusted with the knob.
 * **Alarm 2** - Second alarm time, works the same as Alarm 1.
 * **Alarm Vol** - Volume level when an alarm triggers.
 * **About** - Informational screens (Help, Authors, System).
 
 ## Alarm
 
-Use **Alarm 1** and **Alarm 2** in the Settings menu to set wake up times. Rotate the encoder to adjust the minutes. Hold the encoder button while rotating to adjust the hours. Short press toggles the alarm on or off. The **Alarm Vol** item defines the volume level used when an alarm activates.
+Use **Alarm 1** and **Alarm 2** in the Settings menu to set wake up times. Minutes are adjusted first and blink to indicate editing. Press the encoder once to edit the hours and again to toggle the alarm on or off. Each active field blinks in a 75/25 duty cycle. The **Alarm Vol** item defines the volume level used when an alarm activates.
 
 ## Wi-Fi
 
