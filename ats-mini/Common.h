@@ -38,7 +38,7 @@
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
-#define RESET_PIN     16            // GPIO16   SI4732/5 Reset
+#define RESET_PIN     11            // GPIO16   SI4732/5 Reset //New Bug: 11
 #define ESP32_I2C_SCL 17            // GPIO17   SI4732/5 Clock
 #define ESP32_I2C_SDA 18            // GPIO18   SI4732/5 Data
 #define AUDIO_MUTE     3            // GPIO3    Hardware L/R mute, controlled via SI4735 code (1 = Mute)
